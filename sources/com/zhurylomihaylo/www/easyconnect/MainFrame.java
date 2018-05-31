@@ -1,81 +1,39 @@
 package com.zhurylomihaylo.www.easyconnect;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Properties;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JTextField;
 
 class MainFrame extends JFrame {
-	private Properties props;
-	private Connection conn;	
-
+	JTextField searchF;
+	JButton impButt;
+	JDialog impDialog;
+	
 	public MainFrame() {
-         readDatabaseProperties();
-         initConnection();
+		DBComm.init(this);
+		buildGUI();
 	}
 
-	private void initConnection() {
-	     try
-	      {
-	         conn = getConnection();
-	      }
-	      catch (SQLException ex)
-	      {
-	         for (Throwable t : ex)
-	            t.printStackTrace();
-	      }
-
-	      addWindowListener(new WindowAdapter()
-	         {
-	            public void windowClosing(WindowEvent event)
-	            {
-	               try
-	               {
-	                  if (conn != null) conn.close();
-	               }
-	               catch (SQLException ex)
-	               {
-	                  for (Throwable t : ex)
-	                     t.printStackTrace();
-	               }               
-	            }
-	         });
-		
+	private void buildGUI() {
+		impButt = new JButton("Import");
+		impButt.addActionListener(importListener());
+		add(impButt);
+		pack();
 	}
 	
-	private void readDatabaseProperties()  {
-		props = new Properties();
-
-		Path path = Paths.get("database.properties");
-		if (Files.exists(path) && Files.isRegularFile(path)) {
-			try (InputStream in = Files.newInputStream(Paths.get("database.properties"))) {
-				props.load(in);
-			} catch (IOException ex) {
-				throw new RuntimeException(ex);
+	private ActionListener importListener() {
+		ActionListener listener = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				 if (impDialog == null) // first time
+					 impDialog = new ImportDialog(MainFrame.this);
+				 impDialog.setVisible(true); // pop up dialog
 			}
-		} else {
-			props.setProperty("jdbc.drivers", "org.h2.Driver");
-			props.setProperty("jdbc.url", "jdbc:h2:./database");
-		}
-		String drivers = props.getProperty("jdbc.drivers");
-		if (drivers != null)
-			System.setProperty("jdbc.drivers", drivers);
+		};
+		return listener;
 	}
-
-	private Connection getConnection() throws SQLException {
-		String url = props.getProperty("jdbc.url");
-		return DriverManager.getConnection(url);
-	}
-
 }

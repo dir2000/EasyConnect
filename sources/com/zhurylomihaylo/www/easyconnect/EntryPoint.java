@@ -9,7 +9,7 @@ public class EntryPoint {
 	public static void main(String[] args) {
 		EventQueue.invokeLater(() -> {
 			MainFrame frame = new MainFrame();
-			frame.setTitle("ViewDB");
+			frame.setTitle("Easy connect");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.setVisible(true);
 		});
