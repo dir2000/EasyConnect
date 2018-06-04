@@ -4,8 +4,10 @@ import java.awt.BorderLayout;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import java.awt.GridLayout;
@@ -13,6 +15,8 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.nio.file.Paths;
 import java.awt.event.ActionEvent;
 
 /**
@@ -22,18 +26,19 @@ import java.awt.event.ActionEvent;
 class ImportDialog extends JDialog {
 	private JTextField orgName;
 	private JTextField filePath;
-	
+	private JFileChooser fileChoo;
+
 	public ImportDialog(JFrame owner) {
 		super(owner, "Import dialog", true);
 
 		JPanel panel = new JPanel();
 		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[] {90, 90, 90, 90, 0};
-		gbl_panel.rowHeights = new int[] {20, 20, 0};
-		gbl_panel.columnWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel.columnWidths = new int[] { 90, 90, 90, 90, 0 };
+		gbl_panel.rowHeights = new int[] { 20, 20, 0 };
+		gbl_panel.columnWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_panel.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
 		panel.setLayout(gbl_panel);
-		
+
 		GridBagConstraints gbc_orgLabel = new GridBagConstraints();
 		gbc_orgLabel.fill = GridBagConstraints.BOTH;
 		gbc_orgLabel.insets = new Insets(0, 0, 5, 5);
@@ -49,9 +54,9 @@ class ImportDialog extends JDialog {
 		gbc_orgName.gridx = 1;
 		gbc_orgName.gridy = 0;
 		panel.add(orgName, gbc_orgName);
-		
+
 		getContentPane().add(panel);
-		
+
 		GridBagConstraints gbc_fileLabel = new GridBagConstraints();
 		gbc_fileLabel.fill = GridBagConstraints.BOTH;
 		gbc_fileLabel.insets = new Insets(0, 0, 0, 5);
@@ -68,19 +73,80 @@ class ImportDialog extends JDialog {
 		gbc_filePath.gridy = 1;
 		panel.add(filePath, gbc_filePath);
 
+		JButton btnBrowse = new JButton("Browse...");
+		btnBrowse.addActionListener(browseListener());
+		GridBagConstraints gbc_btnBrowse = new GridBagConstraints();
+		gbc_btnBrowse.gridx = 4;
+		gbc_btnBrowse.gridy = 1;
+		panel.add(btnBrowse, gbc_btnBrowse);
+
 		// OK button closes the dialog
 
-		JButton ok = new JButton("OK");
-		ok.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				ImportDialog.this.setVisible(false);
-			}
-		});
+		JButton btnImport = new JButton("Import");
+		btnImport.addActionListener(importListener());
 
-		JPanel panel2 = new JPanel();
-		panel2.add(ok);
-		getContentPane().add(panel2, BorderLayout.SOUTH);
+		JPanel buttonsPanel = new JPanel();
+		buttonsPanel.add(btnImport);
+		getContentPane().add(buttonsPanel, BorderLayout.SOUTH);
+		
+		JButton btnClose = new JButton("Close");
+		btnClose.addActionListener(closeListener());
+		buttonsPanel.add(btnClose);
 
 		pack();
 	}
+
+	private ActionListener browseListener() {
+		return new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (fileChoo == null)
+					fileChoo = new JFileChooser();
+				int result = fileChoo.showOpenDialog(ImportDialog.this);
+				if (result == JFileChooser.APPROVE_OPTION)
+					filePath.setText(fileChoo.getSelectedFile().getPath());
+			}
+		};		
+	}
+
+	private ActionListener importListener() {
+		return new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				boolean reject = false;
+
+				String orgString = orgName.getText();
+				if (orgString.equals(null) || orgString.equals("")) {
+					JOptionPane.showMessageDialog(ImportDialog.this, "Organisation name is empty");
+					reject = true;
+				}
+
+				String pathString = filePath.getText();
+				if (pathString.equals(null) || pathString.equals("")) {
+					JOptionPane.showMessageDialog(ImportDialog.this, "File path is empty");
+					reject = true;
+				} else {
+					File file = new File(pathString);
+					if (!file.exists()) {
+						JOptionPane.showMessageDialog(ImportDialog.this, "File " + pathString + " does not exist");
+						reject = true;
+					}
+				}
+
+				if (reject)
+					return;
+
+				ImportDialog.this.setVisible(false);
+			}
+		};
+	}
+
+	private ActionListener closeListener() {
+		return new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				ImportDialog.this.setVisible(false);
+			}
+		};
+	}
+	
+	 
 }
