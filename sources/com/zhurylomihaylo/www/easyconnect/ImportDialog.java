@@ -2,6 +2,7 @@ package com.zhurylomihaylo.www.easyconnect;
 
 import java.awt.BorderLayout;
 
+import javax.management.RuntimeErrorException;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -10,6 +11,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import org.h2.expression.Rownum;
+import org.h2.util.StringUtils;
+
 import java.awt.GridLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -18,9 +23,17 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
+import java.io.UTFDataFormatException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Iterator;
+import java.util.stream.Stream;
 import java.awt.event.ActionEvent;
 
 /**
@@ -155,7 +168,31 @@ class ImportDialog extends JDialog {
 					}
 				}
 				
+				String user = "", comp = "";
+				boolean isBlock;
 				
+				try(Stream<String> lines = Files.lines(Paths.get(pathString), Charset.forName("UTF-8"))){
+					Iterator<String> iter = lines.iterator();
+					int rowNumber = 0;
+					while (iter.hasNext()) {
+						rowNumber++;
+						if (rowNumber < 3) continue;
+						
+						String line = iter.next();
+						if (rowNumber % 2 == 1) {
+							user = line;
+							comp = "";
+							isBlock = true;
+						} else {
+							comp = line;
+							isBlock = false;
+							importRow(user, comp);
+						}
+						
+					}
+				} catch (IOException e1) {
+					throw new RuntimeException(e1);
+				};
 
 				if (reject)
 					return;
@@ -165,6 +202,43 @@ class ImportDialog extends JDialog {
 		};
 	}
 
+	private void importRow(String user, String comp) {
+		if (StringUtils.isNullOrEmpty(user) || StringUtils.isNullOrEmpty(comp)) return;
+		
+		String org = orgName.getText(); 
+		
+		Connection conn = DBComm.getConnection();
+		
+		String cmdSel = "SELECT * FROM MainTable WHERE Person = ? AND Comp = ?";
+		String cmdUpd = "INSERT INTO MainTable (Person, Comp, Orgs) VALUES (?, ?, ?)";
+		
+		try (PreparedStatement statSel = conn.prepareStatement(cmdSel, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+				PreparedStatement statIns = conn.prepareStatement(cmdUpd)) {
+			statSel.setString(1, user);
+			statSel.setString(2, comp);
+			ResultSet rs = statSel.executeQuery();
+			if (rs.next()) {
+				String orgs = rs.getString("Orgs");
+				if (!orgs.contains(org)) {
+					orgs = orgs + ", " + org;
+					rs.updateString("Orgs", orgs);
+					rs.updateRow();
+				}
+			} else {
+				statIns.setString(1, user);
+				statIns.setString(2, comp);
+				statIns.setString(3, org);
+				
+				statIns.executeUpdate();
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
 	private ActionListener closeListener() {
 		return new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
