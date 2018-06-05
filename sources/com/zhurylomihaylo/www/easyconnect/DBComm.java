@@ -22,18 +22,6 @@ class DBComm {
 
 	static void init(MainFrame frame) {
 		createConnection();
-		frame.addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent event) {
-				try {
-					if (conn != null)
-						conn.close();
-				} catch (SQLException ex) {
-					for (Throwable t : ex)
-						JOptionPane.showMessageDialog(frame, t.getStackTrace(), "Connection closing error",
-								JOptionPane.ERROR_MESSAGE);
-				}
-			}
-		});
 		checkSchema();
 	}
 

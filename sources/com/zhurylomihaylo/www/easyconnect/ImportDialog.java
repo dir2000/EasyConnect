@@ -15,8 +15,12 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.awt.event.ActionEvent;
 
 /**
@@ -30,7 +34,12 @@ class ImportDialog extends JDialog {
 
 	public ImportDialog(JFrame owner) {
 		super(owner, "Import dialog", true);
+		buildGUI();
+		restoreValues();
+	}
 
+
+	private void buildGUI() {
 		JPanel panel = new JPanel();
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[] { 90, 90, 90, 90, 0 };
@@ -96,6 +105,21 @@ class ImportDialog extends JDialog {
 		pack();
 	}
 
+	private void restoreValues() {
+		String orgNameStr = (String) Props.get("orgName");
+		if (orgNameStr != null)
+			orgName.setText(orgNameStr);
+			
+		String filePathStr = (String) Props.get("filePath");
+		if (filePathStr != null)
+			filePath.setText(filePathStr);		
+	} 
+	
+	private void storeValues() {
+		Props.put("orgName", orgName.getText());
+		Props.put("filePath", filePath.getText());
+	}
+	
 	private ActionListener browseListener() {
 		return new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -130,6 +154,8 @@ class ImportDialog extends JDialog {
 						reject = true;
 					}
 				}
+				
+				
 
 				if (reject)
 					return;
@@ -146,6 +172,13 @@ class ImportDialog extends JDialog {
 				ImportDialog.this.setVisible(false);
 			}
 		};
+	}
+
+
+	@Override
+	public void setVisible(boolean b) {
+		storeValues();
+		super.setVisible(b);
 	}
 	
 	 
