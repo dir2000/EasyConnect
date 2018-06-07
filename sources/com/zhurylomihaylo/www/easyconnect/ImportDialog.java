@@ -32,7 +32,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.stream.Stream;
 import java.awt.event.ActionEvent;
 
@@ -167,9 +170,13 @@ class ImportDialog extends JDialog {
 						reject = true;
 					}
 				}
+
+				if (reject)
+					return;
 				
 				String user = "", comp = "";
-				boolean isBlock;
+				String regex = "///";
+				HashSet<String> uniPairs = new HashSet<>();
 				
 				try(Stream<String> lines = Files.lines(Paths.get(pathString), Charset.forName("UTF-8"))){
 					Iterator<String> iter = lines.iterator();
@@ -182,11 +189,9 @@ class ImportDialog extends JDialog {
 						if (rowNumber % 2 == 1) {
 							user = line;
 							comp = "";
-							isBlock = true;
 						} else {
 							comp = line;
-							isBlock = false;
-							importRow(user, comp);
+							uniPairs.add(user + regex + comp);
 						}
 						
 					}
@@ -194,9 +199,13 @@ class ImportDialog extends JDialog {
 					throw new RuntimeException(e1);
 				};
 
-				if (reject)
-					return;
-
+				String[] splRes;
+				for (String pair: uniPairs) {
+					splRes = pair.split(regex);
+					if (splRes.length == 2)
+						importRow(splRes[0], splRes[1]);
+				}
+				
 				ImportDialog.this.setVisible(false);
 			}
 		};
@@ -234,7 +243,7 @@ class ImportDialog extends JDialog {
 			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		
 	}
