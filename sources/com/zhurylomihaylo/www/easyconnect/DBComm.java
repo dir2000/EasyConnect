@@ -9,6 +9,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
@@ -77,6 +79,18 @@ class DBComm {
 				JOptionPane.showMessageDialog(null, t.getStackTrace(), "SQL exception", JOptionPane.ERROR_MESSAGE);
 			System.out.println(command);
 			System.exit(1);
+		}
+	}
+	
+	static ResultSet getDataRowSet() {
+		Statement statSel;
+		try {
+			statSel = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			ResultSet rs = statSel.executeQuery("SELECT * FROM MainTable ORDER BY Person");
+			return rs;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			throw new RuntimeException(e);
 		}
 	}
 }

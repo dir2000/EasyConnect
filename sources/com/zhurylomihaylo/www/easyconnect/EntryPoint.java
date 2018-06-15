@@ -11,6 +11,7 @@ public class EntryPoint {
 			MainFrame frame = new MainFrame();
 			frame.setTitle("Easy connect");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame.setSize(800, 500);
 			frame.setVisible(true);
 		});
 	}
