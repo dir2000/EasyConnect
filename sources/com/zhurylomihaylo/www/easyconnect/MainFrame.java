@@ -3,8 +3,11 @@ package com.zhurylomihaylo.www.easyconnect;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.Connection;
@@ -17,6 +20,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.WindowConstants;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JMenu;
@@ -26,6 +30,7 @@ class MainFrame extends JFrame {
 	private JMenuItem mntmImport;
 	private JButton impButt;
 	private JDialog impDialog;
+	private JDialog optDialog;
 	private JTable dataTable;
 	private JMenuItem mntmExit;
 	private JMenuBar menuBar;
@@ -71,16 +76,16 @@ class MainFrame extends JFrame {
 		mnFile.add(mntmExit);
 		
 		mntmOptions = new JMenuItem("Options");
-		mntmOptions.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
 		menuBar.add(mntmOptions);
+		
 		mntmExit.addActionListener(exitListener());
 		mntmImport.addActionListener(importListener());
+		mntmOptions.addActionListener(optionsListener());
+		
 		actionOnClose();
 		
 		dataTable = new JTable(new DataTableModel());
+		dataTable.addMouseListener(doubleClickListener());
 		getContentPane().add(new JScrollPane(dataTable), BorderLayout.CENTER);
 		
 		pack();
@@ -90,8 +95,10 @@ class MainFrame extends JFrame {
 		ActionListener listener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				 if (impDialog == null) // first time
+				 if (impDialog == null) { 
 					 impDialog = new ImportDialog(MainFrame.this);
+					 impDialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+				 }
 				 impDialog.setVisible(true); // pop up dialog
 			}
 		};
@@ -114,11 +121,27 @@ class MainFrame extends JFrame {
 		ActionListener listener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				 if (impDialog == null) // first time
-					 impDialog = new ImportDialog(MainFrame.this);
-				 impDialog.setVisible(true); // pop up dialog
+				 if (optDialog == null) // first time
+					 optDialog = new OptionsDialog(MainFrame.this);
+				 optDialog.setVisible(true); // pop up dialog
 			}
 		};
 		return listener;
 	}	
+	
+	private MouseAdapter doubleClickListener() {
+		MouseAdapter adapter = new MouseAdapter() {
+			public void mousePressed(MouseEvent mouseEvent) {
+				JTable table = (JTable) mouseEvent.getSource();
+				Point point = mouseEvent.getPoint();
+				int row = table.rowAtPoint(point);
+				if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
+					JOptionPane.showMessageDialog(MainFrame.this, table.getSelectedRow());
+					// // your valueChanged overridden method
+				}
+			}
+		};
+
+		return adapter;
+	}
 }

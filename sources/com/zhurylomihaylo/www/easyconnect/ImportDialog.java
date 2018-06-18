@@ -11,6 +11,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.h2.expression.Rownum;
 import org.h2.util.StringUtils;
@@ -46,12 +48,11 @@ import java.awt.event.ActionEvent;
 class ImportDialog extends JDialog {
 	private JTextField orgName;
 	private JTextField filePath;
-	private JFileChooser fileChoo;
+	private JFileChooser fileChooser;
 
 	public ImportDialog(JFrame owner) {
 		super(owner, "Import dialog", true);
 		buildGUI();
-		restoreValues();
 	}
 
 
@@ -114,21 +115,21 @@ class ImportDialog extends JDialog {
 		buttonsPanel.add(btnImport);
 		getContentPane().add(buttonsPanel, BorderLayout.SOUTH);
 		
-		JButton btnClose = new JButton("Close");
-		btnClose.addActionListener(closeListener());
-		buttonsPanel.add(btnClose);
+		JButton btnCancel = new JButton("Cancel");
+		btnCancel.addActionListener(cancelListener());
+		buttonsPanel.add(btnCancel);
 
 		pack();
 	}
 
 	private void restoreValues() {
-		String orgNameStr = (String) Props.get("orgName");
+		Object orgNameStr = Props.get("orgName");
 		if (orgNameStr != null)
-			orgName.setText(orgNameStr);
+			orgName.setText((String) orgNameStr);
 			
-		String filePathStr = (String) Props.get("filePath");
+		Object filePathStr = Props.get("filePath");
 		if (filePathStr != null)
-			filePath.setText(filePathStr);		
+			filePath.setText((String) filePathStr);		
 	} 
 	
 	private void storeValues() {
@@ -139,11 +140,14 @@ class ImportDialog extends JDialog {
 	private ActionListener browseListener() {
 		return new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (fileChoo == null)
-					fileChoo = new JFileChooser();
-				int result = fileChoo.showOpenDialog(ImportDialog.this);
+				if (fileChooser == null) {
+					fileChooser = new JFileChooser();
+					FileFilter filter = new FileNameExtensionFilter("txt File","txt");
+					fileChooser.setFileFilter(filter);
+				}
+				int result = fileChooser.showOpenDialog(ImportDialog.this);
 				if (result == JFileChooser.APPROVE_OPTION)
-					filePath.setText(fileChoo.getSelectedFile().getPath());
+					filePath.setText(fileChooser.getSelectedFile().getPath());
 			}
 		};		
 	}
@@ -248,10 +252,9 @@ class ImportDialog extends JDialog {
 		
 	}
 	
-	private ActionListener closeListener() {
+	private ActionListener cancelListener() {
 		return new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
 				ImportDialog.this.setVisible(false);
 			}
 		};
@@ -260,9 +263,11 @@ class ImportDialog extends JDialog {
 
 	@Override
 	public void setVisible(boolean b) {
-		storeValues();
+		if (b)
+			restoreValues();
+		else
+			storeValues();
 		super.setVisible(b);
-	}
-	
+	}	
 	 
 }

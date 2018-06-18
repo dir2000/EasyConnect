@@ -48,7 +48,7 @@ public class DataTableModel implements TableModel {
 //		this.dataRowSet.addRowSetListener(listener);
 //	}
 
-	public void insertRow(String coffeeName, int supplierID, float price, int sales, int total) throws SQLException {
+	void insertRow(String coffeeName, int supplierID, float price, int sales, int total) throws SQLException {
 
 		try {
 			this.dataRowSet.moveToInsertRow();
@@ -65,7 +65,7 @@ public class DataTableModel implements TableModel {
 		}
 	}
 
-	public void close() {
+	void close() {
 		try {
 			dataRowSet.getStatement().close();
 		} catch (SQLException e) {
