@@ -27,6 +27,8 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.UTFDataFormatException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -46,12 +48,14 @@ import java.awt.event.ActionEvent;
  * the OK button.
  */
 class ImportDialog extends JDialog {
+	MainFrame owner;
 	private JTextField orgName;
 	private JTextField filePath;
 	private JFileChooser fileChooser;
 
-	public ImportDialog(JFrame owner) {
+	public ImportDialog(MainFrame owner) {
 		super(owner, "Import dialog", true);
+		this.owner = owner;
 		buildGUI();
 	}
 
@@ -145,6 +149,14 @@ class ImportDialog extends JDialog {
 					FileFilter filter = new FileNameExtensionFilter("txt File","txt");
 					fileChooser.setFileFilter(filter);
 				}
+				
+				String filePathStr = filePath.getText();
+				if (filePathStr != null && !filePathStr.equals("")) { 
+					File file = new File(filePathStr);
+					if (file.exists()) {
+						fileChooser.setCurrentDirectory(file);
+					}
+				};
 				int result = fileChooser.showOpenDialog(ImportDialog.this);
 				if (result == JFileChooser.APPROVE_OPTION)
 					filePath.setText(fileChooser.getSelectedFile().getPath());
@@ -210,6 +222,7 @@ class ImportDialog extends JDialog {
 						importRow(splRes[0], splRes[1]);
 				}
 				
+				//owner.getDataTable();
 				ImportDialog.this.setVisible(false);
 			}
 		};
@@ -217,6 +230,15 @@ class ImportDialog extends JDialog {
 
 	private void importRow(String user, String comp) {
 		if (StringUtils.isNullOrEmpty(user) || StringUtils.isNullOrEmpty(comp)) return;
+		
+		try {
+			InetAddress address = InetAddress.getByName(comp);
+		} catch (UnknownHostException e1) {
+			System.out.println("Cannot resolve IP-address for " + comp);
+			return;
+		}
+		if (user.equals("Администратор") || user.equals("Внешний аудитор"))
+			return;
 		
 		String org = orgName.getText(); 
 		

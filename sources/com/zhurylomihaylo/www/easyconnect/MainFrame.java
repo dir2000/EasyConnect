@@ -140,7 +140,6 @@ class MainFrame extends JFrame {
 				Point point = mouseEvent.getPoint();
 				int row = table.rowAtPoint(point);
 				if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
-					//JOptionPane.showMessageDialog(MainFrame.this, table.getSelectedRow());
 					// // your valueChanged overridden method
 					String comp = (String) tableModel.getValueAt(row, 2);
 					//JOptionPane.showMessageDialog(MainFrame.this, comp);
@@ -155,12 +154,14 @@ class MainFrame extends JFrame {
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
-					//filePath.setText((String) filePathStr);
-
 				}
 			}
 		};
 
 		return adapter;
+	}
+	
+	TableModel getDataTable() {
+		return tableModel;
 	}
 }
