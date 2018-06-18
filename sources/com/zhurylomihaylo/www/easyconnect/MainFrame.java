@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -21,6 +22,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
+import javax.swing.table.TableModel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JMenu;
@@ -36,6 +38,7 @@ class MainFrame extends JFrame {
 	private JMenuBar menuBar;
 	private JMenu mnFile;
 	private JMenuItem mntmOptions;
+	private TableModel tableModel;
 
 	public MainFrame() {
 		Props.init();
@@ -84,7 +87,8 @@ class MainFrame extends JFrame {
 		
 		actionOnClose();
 		
-		dataTable = new JTable(new DataTableModel());
+		tableModel = new DataTableModel();
+		dataTable = new JTable(tableModel);
 		dataTable.addMouseListener(doubleClickListener());
 		getContentPane().add(new JScrollPane(dataTable), BorderLayout.CENTER);
 		
@@ -136,8 +140,23 @@ class MainFrame extends JFrame {
 				Point point = mouseEvent.getPoint();
 				int row = table.rowAtPoint(point);
 				if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
-					JOptionPane.showMessageDialog(MainFrame.this, table.getSelectedRow());
+					//JOptionPane.showMessageDialog(MainFrame.this, table.getSelectedRow());
 					// // your valueChanged overridden method
+					String comp = (String) tableModel.getValueAt(row, 2);
+					//JOptionPane.showMessageDialog(MainFrame.this, comp);
+					Object filePathOb = Props.get("remoteProgramPath");
+					if (filePathOb == null || filePathOb.equals("")) {
+						JOptionPane.showMessageDialog(MainFrame.this, "Use \"Options\" menu to set remote program path!");
+						return;
+					}
+					String command = (String) filePathOb + " " + comp;
+					try {
+						Runtime.getRuntime().exec(command);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+					//filePath.setText((String) filePathStr);
+
 				}
 			}
 		};
