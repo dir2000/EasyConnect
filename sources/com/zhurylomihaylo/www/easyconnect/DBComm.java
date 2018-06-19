@@ -67,7 +67,7 @@ class DBComm {
 
 	static void checkSchema() {
 		String command = "CREATE TABLE IF NOT EXISTS MainTable"
-				+ " (Id INT(11) NOT NULL AUTO_INCREMENT,"
+				+ " (Id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,"
 				+ " Person VARCHAR_IGNORECASE(128) NOT NULL,"
 				+ " Comp VARCHAR(128),"
 				+ " Orgs VARCHAR(256));";

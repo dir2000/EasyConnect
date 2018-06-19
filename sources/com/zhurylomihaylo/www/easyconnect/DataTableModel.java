@@ -12,9 +12,10 @@ import javax.sql.RowSetListener;
 import javax.sql.rowset.CachedRowSet;
 
 import javax.swing.event.TableModelListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
-public class DataTableModel implements TableModel {
+public class DataTableModel extends AbstractTableModel {
 
 	ResultSet dataRowSet; // The ResultSet to interpret
 	ResultSetMetaData metadata; // Additional information about the results
@@ -136,12 +137,6 @@ public class DataTableModel implements TableModel {
 		}
 	}
 
-	/**
-	 * Method from interface TableModel; returns true if the specified cell is
-	 * editable. This sample does not allow users to edit any cells from the
-	 * TableModel (rows are added by another window control). Thus, this method
-	 * returns false.
-	 */
 
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
 		return false;
@@ -153,12 +148,6 @@ public class DataTableModel implements TableModel {
 
 	public void setValueAt(Object value, int row, int column) {
 		System.out.println("Calling setValueAt row " + row + ", column " + column);
-	}
-
-	public void addTableModelListener(TableModelListener l) {
-	}
-
-	public void removeTableModelListener(TableModelListener l) {
 	}
 
 }

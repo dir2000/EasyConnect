@@ -38,7 +38,7 @@ class MainFrame extends JFrame {
 	private JMenuBar menuBar;
 	private JMenu mnFile;
 	private JMenuItem mntmOptions;
-	private TableModel tableModel;
+	private DataTableModel dataTableModel;
 
 	public MainFrame() {
 		Props.init();
@@ -87,8 +87,8 @@ class MainFrame extends JFrame {
 		
 		actionOnClose();
 		
-		tableModel = new DataTableModel();
-		dataTable = new JTable(tableModel);
+		dataTableModel = new DataTableModel();
+		dataTable = new JTable(dataTableModel);
 		dataTable.addMouseListener(doubleClickListener());
 		getContentPane().add(new JScrollPane(dataTable), BorderLayout.CENTER);
 		
@@ -141,7 +141,7 @@ class MainFrame extends JFrame {
 				int row = table.rowAtPoint(point);
 				if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
 					// // your valueChanged overridden method
-					String comp = (String) tableModel.getValueAt(row, 2);
+					String comp = (String) dataTableModel.getValueAt(row, 2);
 					//JOptionPane.showMessageDialog(MainFrame.this, comp);
 					Object filePathOb = Props.get("remoteProgramPath");
 					if (filePathOb == null || filePathOb.equals("")) {
@@ -161,7 +161,7 @@ class MainFrame extends JFrame {
 		return adapter;
 	}
 	
-	TableModel getDataTable() {
-		return tableModel;
+	DataTableModel getDataTableModel() {
+		return dataTableModel;
 	}
 }

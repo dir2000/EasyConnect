@@ -10,6 +10,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -49,9 +50,9 @@ import java.awt.event.ActionEvent;
  */
 class ImportDialog extends JDialog {
 	MainFrame owner;
-	private JTextField orgName;
 	private JTextField filePath;
 	private JFileChooser fileChooser;
+	private JTextArea logArea;
 
 	public ImportDialog(MainFrame owner) {
 		super(owner, "Import dialog", true);
@@ -64,80 +65,74 @@ class ImportDialog extends JDialog {
 		JPanel panel = new JPanel();
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[] { 90, 90, 90, 90, 0 };
-		gbl_panel.rowHeights = new int[] { 20, 20, 0 };
+		gbl_panel.rowHeights = new int[] { 20, 20, 20, 20,20, 0 };
 		gbl_panel.columnWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		gbl_panel.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
 		panel.setLayout(gbl_panel);
 
-		GridBagConstraints gbc_orgLabel = new GridBagConstraints();
-		gbc_orgLabel.fill = GridBagConstraints.BOTH;
-		gbc_orgLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_orgLabel.gridx = 0;
-		gbc_orgLabel.gridy = 0;
-		JLabel orgLabel = new JLabel("Organisation name");
-		panel.add(orgLabel, gbc_orgLabel);
-		orgName = new JTextField();
-		GridBagConstraints gbc_orgName = new GridBagConstraints();
-		gbc_orgName.gridwidth = 3;
-		gbc_orgName.fill = GridBagConstraints.BOTH;
-		gbc_orgName.insets = new Insets(0, 0, 5, 5);
-		gbc_orgName.gridx = 1;
-		gbc_orgName.gridy = 0;
-		panel.add(orgName, gbc_orgName);
-
 		getContentPane().add(panel);
-
-		GridBagConstraints gbc_fileLabel = new GridBagConstraints();
-		gbc_fileLabel.fill = GridBagConstraints.BOTH;
-		gbc_fileLabel.insets = new Insets(0, 0, 0, 5);
-		gbc_fileLabel.gridx = 0;
-		gbc_fileLabel.gridy = 1;
-		JLabel fileLabel = new JLabel("File path (*.txt)");
-		panel.add(fileLabel, gbc_fileLabel);
+		
+				GridBagConstraints gbc_fileLabel = new GridBagConstraints();
+				gbc_fileLabel.fill = GridBagConstraints.BOTH;
+				gbc_fileLabel.insets = new Insets(0, 0, 5, 5);
+				gbc_fileLabel.gridx = 0;
+				gbc_fileLabel.gridy = 0;
+				JLabel fileLabel = new JLabel("File path (*.txt)");
+				panel.add(fileLabel, gbc_fileLabel);
 		filePath = new JTextField();
 		GridBagConstraints gbc_filePath = new GridBagConstraints();
 		gbc_filePath.gridwidth = 3;
 		gbc_filePath.fill = GridBagConstraints.BOTH;
-		gbc_filePath.insets = new Insets(0, 0, 0, 5);
+		gbc_filePath.insets = new Insets(0, 0, 5, 5);
 		gbc_filePath.gridx = 1;
-		gbc_filePath.gridy = 1;
+		gbc_filePath.gridy = 0;
 		panel.add(filePath, gbc_filePath);
-
-		JButton btnBrowse = new JButton("Browse...");
-		btnBrowse.addActionListener(browseListener());
-		GridBagConstraints gbc_btnBrowse = new GridBagConstraints();
-		gbc_btnBrowse.gridx = 4;
-		gbc_btnBrowse.gridy = 1;
-		panel.add(btnBrowse, gbc_btnBrowse);
-
-		// OK button closes the dialog
-
-		JButton btnImport = new JButton("Import");
-		btnImport.addActionListener(importListener());
-
-		JPanel buttonsPanel = new JPanel();
-		buttonsPanel.add(btnImport);
-		getContentPane().add(buttonsPanel, BorderLayout.SOUTH);
 		
-		JButton btnCancel = new JButton("Cancel");
-		btnCancel.addActionListener(cancelListener());
-		buttonsPanel.add(btnCancel);
+				JButton btnBrowse = new JButton("Browse...");
+				btnBrowse.addActionListener(browseListener());
+				GridBagConstraints gbc_btnBrowse = new GridBagConstraints();
+				gbc_btnBrowse.insets = new Insets(0, 0, 5, 0);
+				gbc_btnBrowse.gridx = 4;
+				gbc_btnBrowse.gridy = 0;
+				panel.add(btnBrowse, gbc_btnBrowse);
+		
+				// OK button closes the dialog
+		
+				JButton btnImport = new JButton("Import");
+				btnImport.addActionListener(importListener());
+				
+						JPanel buttonsPanel = new JPanel();
+						GridBagConstraints gbc_buttonsPanel = new GridBagConstraints();
+						gbc_buttonsPanel.gridwidth = 6;
+						gbc_buttonsPanel.insets = new Insets(0, 0, 5, 0);
+						gbc_buttonsPanel.gridx = 0;
+						gbc_buttonsPanel.gridy = 1;
+						panel.add(buttonsPanel, gbc_buttonsPanel);
+						buttonsPanel.add(btnImport);
+						
+						JButton btnCancel = new JButton("Cancel");
+						btnCancel.addActionListener(cancelListener());
+						buttonsPanel.add(btnCancel);
 
+//		logArea = new JTextArea();
+//		logArea.setEditable(false);
+//		GridBagConstraints gbc_logArea = new GridBagConstraints();
+//		gbc_logArea.gridwidth = 3;
+//		//gbc_logArea.gridheight = GridBagConstraints.REMAINDER;
+//		gbc_logArea.gridx = 0;
+//		gbc_logArea.gridy = 3;
+//		getContentPane().add(logArea, BorderLayout.SOUTH);
+		
 		pack();
 	}
 
 	private void restoreValues() {
-		Object orgNameStr = Props.get("orgName");
-		if (orgNameStr != null)
-			orgName.setText((String) orgNameStr);
-			
 		Object filePathStr = Props.get("filePath");
 		if (filePathStr != null)
 			filePath.setText((String) filePathStr);		
 	} 
 	
 	private void storeValues() {
-		Props.put("orgName", orgName.getText());
 		Props.put("filePath", filePath.getText());
 	}
 	
@@ -168,13 +163,8 @@ class ImportDialog extends JDialog {
 		return new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				boolean reject = false;
-
-				String orgString = orgName.getText();
-				if (orgString.equals(null) || orgString.equals("")) {
-					JOptionPane.showMessageDialog(ImportDialog.this, "Organisation name is empty");
-					reject = true;
-				}
-
+				String fileName = "";
+				
 				String pathString = filePath.getText();
 				if (pathString.equals(null) || pathString.equals("")) {
 					JOptionPane.showMessageDialog(ImportDialog.this, "File path is empty");
@@ -185,6 +175,7 @@ class ImportDialog extends JDialog {
 						JOptionPane.showMessageDialog(ImportDialog.this, "File " + pathString + " does not exist");
 						reject = true;
 					}
+					fileName = file.getName().replaceFirst(".txt", "").replaceFirst(".TXT", "");
 				}
 
 				if (reject)
@@ -219,50 +210,59 @@ class ImportDialog extends JDialog {
 				for (String pair: uniPairs) {
 					splRes = pair.split(regex);
 					if (splRes.length == 2)
-						importRow(splRes[0], splRes[1]);
+						importRow(splRes[0], splRes[1], fileName);
 				}
 				
-				//owner.getDataTable();
+				owner.getDataTableModel().fireTableDataChanged();
 				ImportDialog.this.setVisible(false);
 			}
 		};
 	}
 
-	private void importRow(String user, String comp) {
+	private void importRow(String user, String comp, String fileName) {
 		if (StringUtils.isNullOrEmpty(user) || StringUtils.isNullOrEmpty(comp)) return;
+
+		if (user.equals("Администратор") || user.equals("Внешний аудитор") || user.equals("Монитор клиентам"))
+			return;
+		if (comp.equals("A-GANDRABUR") || comp.equals("ZHURYLO") || comp.equals("S-KURASH"))
+			return;
 		
 		try {
 			InetAddress address = InetAddress.getByName(comp);
+			System.out.println("IP-address for " + comp + " is " + address);
 		} catch (UnknownHostException e1) {
 			System.out.println("Cannot resolve IP-address for " + comp);
-			return;
+			comp = comp + ".megapolis.local";
+			try {
+				InetAddress address = InetAddress.getByName(comp);
+				System.out.println("IP-address for " + comp + " is " + address);
+			} catch (UnknownHostException e) {
+				System.out.println("Cannot resolve IP-address for " + comp);
+				return;
+			}
 		}
-		if (user.equals("Администратор") || user.equals("Внешний аудитор"))
-			return;
-		
-		String org = orgName.getText(); 
-		
+
 		Connection conn = DBComm.getConnection();
 		
 		String cmdSel = "SELECT * FROM MainTable WHERE Person = ? AND Comp = ?";
 		String cmdUpd = "INSERT INTO MainTable (Person, Comp, Orgs) VALUES (?, ?, ?)";
 		
 		try (PreparedStatement statSel = conn.prepareStatement(cmdSel, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-				PreparedStatement statIns = conn.prepareStatement(cmdUpd)) {
+				PreparedStatement statIns = conn.prepareStatement(cmdUpd, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE)) {
 			statSel.setString(1, user);
 			statSel.setString(2, comp);
 			ResultSet rs = statSel.executeQuery();
 			if (rs.next()) {
 				String orgs = rs.getString("Orgs");
-				if (!orgs.contains(org)) {
-					orgs = orgs + ", " + org;
+				if (!orgs.contains(fileName)) {
+					orgs = orgs + ", " + fileName;
 					rs.updateString("Orgs", orgs);
 					rs.updateRow();
 				}
 			} else {
 				statIns.setString(1, user);
 				statIns.setString(2, comp);
-				statIns.setString(3, org);
+				statIns.setString(3, fileName);
 				
 				statIns.executeUpdate();
 			}
