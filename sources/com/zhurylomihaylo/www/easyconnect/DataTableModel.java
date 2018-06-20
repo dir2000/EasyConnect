@@ -23,8 +23,18 @@ public class DataTableModel extends AbstractTableModel {
 
 
 	DataTableModel() {
+		refreshData();
+	}
+	
+	void refreshData() {
+		if (dataRowSet != null)
+			try {
+				dataRowSet.close();
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
 		dataRowSet = DBComm.getDataRowSet();
-		updateNums();
+		updateNums();		
 	}
 	
 	void updateNums() {
