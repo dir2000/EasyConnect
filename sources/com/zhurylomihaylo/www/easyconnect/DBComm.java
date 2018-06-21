@@ -70,6 +70,8 @@ class DBComm {
 				+ " (Id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,"
 				+ " Person VARCHAR_IGNORECASE(128) NOT NULL,"
 				+ " Comp VARCHAR(128),"
+				+ " IP VARCHAR(15),"
+				+ " IP_Check_Date Date,"
 				+ " Orgs VARCHAR(256));";
 		try {
 			Statement stat = conn.createStatement();

@@ -40,6 +40,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -122,7 +123,7 @@ class ImportDialog extends JDialog {
 		panel.add(buttonsPanel, gbc_buttonsPanel);
 		buttonsPanel.add(btnImport);
 
-		JButton btnClose = new JButton("Cancel");
+		JButton btnClose = new JButton("Close");
 		btnClose.addActionListener(closeListener());
 		buttonsPanel.add(btnClose);
 		
@@ -248,14 +249,15 @@ class ImportDialog extends JDialog {
 
 		if (user.equals("Администратор") || user.equals("Внешний аудитор") || user.equals("Монитор клиентам"))
 			return;
-		if (comp.equals("A-GANDRABUR") || comp.equals("ZHURYLO") || comp.equals("S-KURASH"))
+		if (comp.equals("A-GANDRABUR") || comp.equals("ZHURYLO") || comp.equals("S-KURASH") || comp.equals("V-SHTEFANIUK"))
 			return;
 
 		Connection conn = DBComm.getConnection();
 
 		String cmdSel = "SELECT * FROM MainTable WHERE Person = ? AND Comp = ?";
-		String cmdUpd = "INSERT INTO MainTable (Person, Comp, Orgs) VALUES (?, ?, ?)";
-
+		String cmdUpd = "INSERT INTO MainTable (Person, Comp, IP, IP_Check_Date, Orgs) VALUES (?, ?, ?, ?, ?)";
+		Date currDate = new Date(new java.util.Date().getTime());
+		
 		try (PreparedStatement statSel = conn.prepareStatement(cmdSel, ResultSet.TYPE_FORWARD_ONLY,
 				ResultSet.CONCUR_UPDATABLE);
 				PreparedStatement statIns = conn.prepareStatement(cmdUpd, ResultSet.TYPE_FORWARD_ONLY,
@@ -273,34 +275,22 @@ class ImportDialog extends JDialog {
 					appendLog("Organisation " + fileName + " has been added to " + user);
 				}
 			} else {
-				String firstTryComp, secondTryComp;
-				
-				if (chckbxMegapolis.isSelected()) {
-					firstTryComp = comp + ".megapolis.local";
-					secondTryComp = comp;
+				Pair<String> compInfo = GeneralPurpose.getIP(comp, chckbxMegapolis.isSelected());
+				String realComp = compInfo.getFirst();				
+				String ip = compInfo.getSecond();
+				if (ip == null) {
+					appendLog("Cannot resolve IP-address for " + comp);
 				} else {
-					firstTryComp = comp;
-					secondTryComp = comp + ".megapolis.local";					
+					appendLog("IP-address for " + realComp + " is " + ip);
+					
+					statIns.setString(1, user); //Person
+					statIns.setString(2, realComp); //Comp
+					statIns.setString(3, ip); //IP
+					statIns.setDate(4, currDate); //Check_Date
+					statIns.setString(5, fileName); //Orgs == fileName
+					statIns.executeUpdate();					
 				}
-				try {
-					InetAddress address = InetAddress.getByName(firstTryComp);
-					appendLog("IP-address for " + firstTryComp + " is " + address);
-					comp = firstTryComp;
-				} catch (UnknownHostException e1) {
-					try {
-						InetAddress address = InetAddress.getByName(secondTryComp);
-						appendLog("IP-address for " + secondTryComp + " is " + address);
-						comp = secondTryComp;
-					} catch (UnknownHostException e) {
-						appendLog("Cannot resolve IP-address for " + secondTryComp);
-						return;
-					}
-				}
-				statIns.setString(1, user);
-				statIns.setString(2, comp);
-				statIns.setString(3, fileName);
 
-				statIns.executeUpdate();
 			}
 
 		} catch (SQLException e) {
@@ -325,6 +315,7 @@ class ImportDialog extends JDialog {
 			taLogArea.append(str + "\n");
 		taLogArea.update(taLogArea.getGraphics());
 	}
+	
 
 	@Override
 	public void setVisible(boolean b) {
