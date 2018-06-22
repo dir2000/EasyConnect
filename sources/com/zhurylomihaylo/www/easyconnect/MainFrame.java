@@ -26,6 +26,8 @@ import javax.swing.table.TableModel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JMenu;
+import javax.swing.JPanel;
+import javax.swing.ImageIcon;
 
 class MainFrame extends JFrame {
 	//private JTextField searchF;
@@ -39,11 +41,17 @@ class MainFrame extends JFrame {
 	private JMenu mnFile;
 	private JMenuItem mntmOptions;
 	private DataTableModel dataTableModel;
+	private JPanel panel;
+	private JButton btnInsert;
+	private JButton btnEdit;
+	private JButton btnDelete;
+	private JButton btnRefresh;
 
-	public MainFrame() {
+	MainFrame() {
 		Props.init();
 		DBComm.init(this);
 		buildGUI();
+		refreshIPs();
 	}
 
 	private void actionOnClose() {
@@ -90,7 +98,33 @@ class MainFrame extends JFrame {
 		dataTableModel = new DataTableModel();
 		dataTable = new JTable(dataTableModel);
 		dataTable.addMouseListener(doubleClickListener());
-		getContentPane().add(new JScrollPane(dataTable), BorderLayout.CENTER);
+		
+		panel = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
+		flowLayout.setAlignment(FlowLayout.LEFT);
+		getContentPane().add(panel, BorderLayout.NORTH);
+		
+		btnInsert = new JButton("Insert");
+		btnInsert.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Insert list item.png")));
+		btnInsert.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+			}
+		});
+		panel.add(btnInsert);
+		
+		btnEdit = new JButton("Edit");
+		btnEdit.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Change list item.png")));
+		panel.add(btnEdit);
+		
+		btnDelete = new JButton("Delete");
+		btnDelete.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Delete list item.png")));
+		panel.add(btnDelete);
+		
+		btnRefresh = new JButton("Refresh");
+		btnRefresh.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Refresh.png")));
+		panel.add(btnRefresh);
+		JScrollPane scrollPane = new JScrollPane(dataTable);
+		getContentPane().add(scrollPane, BorderLayout.CENTER);
 		
 		pack();
 	}
@@ -163,5 +197,11 @@ class MainFrame extends JFrame {
 	
 	DataTableModel getDataTableModel() {
 		return dataTableModel;
+	}
+	
+	private void refreshIPs() {
+		IPRefresher ipr = new IPRefresher();
+		Thread thr = new Thread(ipr);
+		thr.start();
 	}
 }

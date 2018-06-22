@@ -10,7 +10,6 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
@@ -23,26 +22,25 @@ class DBComm {
 	private static Connection conn;
 
 	static void init(MainFrame frame) {
-		createConnection();
+		readDatabaseProperties();		
+		conn = createConnection();
 		checkSchema();
 	}
 
-	static private void createConnection() {
-		readDatabaseProperties();
+	static Connection createConnection() {
 		
 		String url = props.getProperty("jdbc.url");
 		try {
-			conn = DriverManager.getConnection(url);
+			return DriverManager.getConnection(url);
 		} catch (SQLException ex) {
-			for (Throwable t : ex)
+			//for (Throwable t : ex)
 				//JOptionPane.showMessageDialog(null, t.getStackTrace(), "Connection error", JOptionPane.ERROR_MESSAGE);
 			//System.exit(1);
 				throw new RuntimeException(ex);
 		}
-
 	}
 
-	static private void readDatabaseProperties() {
+	private static void readDatabaseProperties() {
 		props = new Properties();
 
 		Path path = Paths.get("database.properties");
@@ -65,7 +63,7 @@ class DBComm {
 		return conn;
 	}
 
-	static void checkSchema() {
+	private static void checkSchema() {
 		String command = "CREATE TABLE IF NOT EXISTS MainTable"
 				+ " (Id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,"
 				+ " Person VARCHAR_IGNORECASE(128) NOT NULL,"
@@ -81,18 +79,6 @@ class DBComm {
 				JOptionPane.showMessageDialog(null, t.getStackTrace(), "SQL exception", JOptionPane.ERROR_MESSAGE);
 			System.out.println(command);
 			System.exit(1);
-		}
-	}
-	
-	static ResultSet getDataRowSet() {
-		Statement statSel;
-		try {
-			statSel = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-			ResultSet rs = statSel.executeQuery("SELECT * FROM MainTable ORDER BY Person");
-			return rs;
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			throw new RuntimeException(e);
 		}
 	}
 }

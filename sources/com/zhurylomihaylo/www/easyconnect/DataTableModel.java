@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.sql.RowSetListener;
 import javax.sql.rowset.CachedRowSet;
@@ -33,10 +34,21 @@ public class DataTableModel extends AbstractTableModel {
 			} catch (SQLException e) {
 				throw new RuntimeException(e);
 			}
-		dataRowSet = DBComm.getDataRowSet();
+		refreshDataRowSet();
 		updateNums();		
 	}
 	
+	void refreshDataRowSet() {
+		Statement statSel;
+		try {
+			statSel = DBComm.getConnection().createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			dataRowSet = statSel.executeQuery("SELECT * FROM MainTable ORDER BY Person");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			throw new RuntimeException(e);
+		}
+	}
+
 	void updateNums() {
 		try {
 			this.metadata = dataRowSet.getMetaData();
