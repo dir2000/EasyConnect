@@ -7,52 +7,83 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
 import java.awt.Font;
+import java.text.ParseException;
+
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.text.MaskFormatter;
 import javax.swing.JTextField;
+import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
+import java.awt.Dimension;
 
 class EditRecord extends JDialog {
+	MainFrame owner;	
 	private JTextField tfPerson;
-	private JTextField textField;
-	private JTextField textField_1;
-	public EditRecord() {
-		
+	private JTextField tfComputer;
+	private JFormattedTextField ftfIPAddress;
+	
+	public EditRecord(MainFrame owner) {
+		super(owner, "Edit record", true);
+		this.owner = owner;		
+		buildGUI();
+	}
+	
+	private void buildGUI() {
 		JPanel panel = new JPanel();
 		getContentPane().add(panel, BorderLayout.CENTER);
 		
 		JLabel lblPerson = new JLabel("Person");
-		lblPerson.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		lblPerson.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		
 		JLabel lblComputer = new JLabel("Computer");
-		lblComputer.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		lblComputer.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		
 		JLabel lblIpaddress = new JLabel("IP-address");
-		lblIpaddress.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		lblIpaddress.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		
 		tfPerson = new JTextField();
-		tfPerson.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		tfPerson.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		tfPerson.setColumns(10);
 		
-		textField = new JTextField();
-		textField.setFont(new Font("Tahoma", Font.PLAIN, 18));
-		textField.setColumns(10);
+		tfComputer = new JTextField();
+		tfComputer.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		tfComputer.setColumns(10);
 		
-		textField_1 = new JTextField();
-		textField_1.setFont(new Font("Tahoma", Font.PLAIN, 18));
-		textField_1.setColumns(10);
+		JButton btnDefineComp = new JButton("Define computer name");
+		btnDefineComp.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		
+		MaskFormatter mf = null;
+		try {
+			mf = new MaskFormatter("###.###.###.###");
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ftfIPAddress = new JFormattedTextField(mf);
+		ftfIPAddress.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		
+		JPanel buttonPanel = new JPanel();
 		GroupLayout gl_panel = new GroupLayout(panel);
 		gl_panel.setHorizontalGroup(
 			gl_panel.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel.createSequentialGroup()
 					.addContainerGap()
-					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING, false)
-						.addComponent(lblIpaddress, GroupLayout.DEFAULT_SIZE, 95, Short.MAX_VALUE)
-						.addComponent(lblComputer, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addComponent(lblPerson, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
+						.addComponent(lblIpaddress, Alignment.TRAILING)
+						.addComponent(lblComputer, Alignment.TRAILING))
 					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
-						.addComponent(tfPerson, GroupLayout.DEFAULT_SIZE, 414, Short.MAX_VALUE)
-						.addComponent(textField, GroupLayout.PREFERRED_SIZE, 414, GroupLayout.PREFERRED_SIZE)
-						.addComponent(textField_1, GroupLayout.PREFERRED_SIZE, 414, GroupLayout.PREFERRED_SIZE))
+						.addComponent(btnDefineComp)
+						.addComponent(tfPerson)
+						.addComponent(ftfIPAddress)
+						.addComponent(tfComputer))
+					.addGap(10))
+				.addGroup(gl_panel.createSequentialGroup()
+					.addGap(10)
+					.addComponent(lblPerson)
+					.addGap(436))
+				.addGroup(gl_panel.createSequentialGroup()
+					.addComponent(buttonPanel)
 					.addContainerGap())
 		);
 		gl_panel.setVerticalGroup(
@@ -60,17 +91,34 @@ class EditRecord extends JDialog {
 				.addGroup(gl_panel.createSequentialGroup()
 					.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblPerson)
-						.addComponent(tfPerson, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING)
-						.addComponent(lblComputer)
-						.addComponent(textField, GroupLayout.PREFERRED_SIZE, 28, GroupLayout.PREFERRED_SIZE))
+						.addComponent(tfPerson))
+					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_panel.createSequentialGroup()
+							.addGap(12)
+							.addComponent(lblIpaddress))
+						.addGroup(gl_panel.createSequentialGroup()
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addComponent(ftfIPAddress)))
+					.addGap(11)
+					.addComponent(btnDefineComp)
 					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblIpaddress, GroupLayout.PREFERRED_SIZE, 20, GroupLayout.PREFERRED_SIZE)
-						.addComponent(textField_1, GroupLayout.PREFERRED_SIZE, 28, GroupLayout.PREFERRED_SIZE))
-					.addContainerGap(169, Short.MAX_VALUE))
+						.addComponent(lblComputer)
+						.addComponent(tfComputer))
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addComponent(buttonPanel)
+					.addContainerGap(72, Short.MAX_VALUE))
 		);
+		
+		JButton btnOk = new JButton("OK");
+		btnOk.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		buttonPanel.add(btnOk);
+		
+		JButton btnCancel = new JButton("Cancel");
+		btnCancel.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		buttonPanel.add(btnCancel);
 		panel.setLayout(gl_panel);
+		
+		pack();
 	}
 }

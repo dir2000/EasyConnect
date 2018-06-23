@@ -35,6 +35,7 @@ class MainFrame extends JFrame {
 	private JButton impButt;
 	private JDialog impDialog;
 	private JDialog optDialog;
+	private JDialog editRecordDialog;
 	private JTable dataTable;
 	private JMenuItem mntmExit;
 	private JMenuBar menuBar;
@@ -106,10 +107,8 @@ class MainFrame extends JFrame {
 		
 		btnInsert = new JButton("Insert");
 		btnInsert.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Insert list item.png")));
-		btnInsert.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-			}
-		});
+		btnInsert.addActionListener(insertListener());
+		//btnInsert.addActionListener((e) -> JOptionPane.showMessageDialog(this, "Insert!"));
 		panel.add(btnInsert);
 		
 		btnEdit = new JButton("Edit");
@@ -127,6 +126,18 @@ class MainFrame extends JFrame {
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
 		
 		pack();
+	}
+
+	private ActionListener insertListener() {
+		return new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				 if (editRecordDialog == null) { 
+					 editRecordDialog = new EditRecord(MainFrame.this);
+					 editRecordDialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+				 }
+				 editRecordDialog.setVisible(true); // pop up dialog			
+			}
+		};
 	}
 	
 	private ActionListener importListener() {
