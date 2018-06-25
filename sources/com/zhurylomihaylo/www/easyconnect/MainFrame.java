@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -128,18 +129,6 @@ class MainFrame extends JFrame {
 		pack();
 	}
 
-	private ActionListener insertListener() {
-		return new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				 if (editRecordDialog == null) { 
-					 editRecordDialog = new EditRecord(MainFrame.this);
-					 editRecordDialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-				 }
-				 editRecordDialog.setVisible(true); // pop up dialog			
-			}
-		};
-	}
-	
 	private ActionListener importListener() {
 		ActionListener listener = new ActionListener() {
 			@Override
@@ -193,6 +182,11 @@ class MainFrame extends JFrame {
 						JOptionPane.showMessageDialog(MainFrame.this, "Use \"Options\" menu to set remote program path!");
 						return;
 					}
+					File file = new File((String) filePathOb);
+					if (!file.exists()) {
+						JOptionPane.showMessageDialog(MainFrame.this, "Remote access program \"" + filePathOb + "\" does not exist.");
+						return;
+					}
 					String command = (String) filePathOb + " " + comp;
 					try {
 						Runtime.getRuntime().exec(command);
@@ -206,6 +200,19 @@ class MainFrame extends JFrame {
 		return adapter;
 	}
 	
+	private ActionListener insertListener() {
+		return new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+
+				if (editRecordDialog == null) {
+					editRecordDialog = new EditRecord(MainFrame.this);
+					editRecordDialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+				}
+				editRecordDialog.setVisible(true); // pop up dialog
+			}
+		};
+	}
+
 	DataTableModel getDataTableModel() {
 		return dataTableModel;
 	}
@@ -213,6 +220,7 @@ class MainFrame extends JFrame {
 	private void refreshIPs() {
 		IPRefresher ipr = new IPRefresher();
 		Thread thr = new Thread(ipr);
+		thr.setDaemon(true);
 		thr.start();
 	}
 }

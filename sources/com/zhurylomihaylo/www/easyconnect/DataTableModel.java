@@ -21,7 +21,7 @@ public class DataTableModel extends AbstractTableModel {
 	ResultSet dataRowSet; // The ResultSet to interpret
 	ResultSetMetaData metadata; // Additional information about the results
 	int numcols, numrows; // How many rows and columns in the table
-
+	
 
 	DataTableModel() {
 		refreshData();
@@ -121,7 +121,9 @@ public class DataTableModel extends AbstractTableModel {
 
 	public String getColumnName(int column) {
 		try {
-			return this.metadata.getColumnLabel(column + 1);
+			String label = this.metadata.getColumnName(column + 1);
+			FieldDescription fd = DBComm.getFieldDescription(label); 
+			return fd.getHeader();
 		} catch (SQLException e) {
 			return e.toString();
 		}
@@ -135,8 +137,15 @@ public class DataTableModel extends AbstractTableModel {
 	 */
 
 	public Class getColumnClass(int column) {
-		return String.class;
+		try {
+			String label = this.metadata.getColumnName(column + 1);
+			FieldDescription fd = DBComm.getFieldDescription(label); 
+			return fd.getType();
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 	}
+
 
 	/**
 	 * Method from interface TableModel; returns the value for the cell specified by
@@ -153,7 +162,7 @@ public class DataTableModel extends AbstractTableModel {
 			if (o == null)
 				return null;
 			else
-				return o.toString();
+				return o;
 		} catch (SQLException e) {
 			return e.toString();
 		}

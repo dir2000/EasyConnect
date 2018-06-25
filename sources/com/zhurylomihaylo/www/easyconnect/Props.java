@@ -10,11 +10,10 @@ import java.io.OutputStream;
 import java.util.Properties;
 
 class Props {
-	static Properties props;
+	static Properties props = new Properties();
 	static private String fileName = "program.properties";
 	
 	static void init() {
-		props = new Properties();
 		File file = new File(fileName);
 		if (file.exists()) {
 			try(InputStream in = new FileInputStream(fileName)) {

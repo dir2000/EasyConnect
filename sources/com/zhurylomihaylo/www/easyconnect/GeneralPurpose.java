@@ -4,7 +4,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 class GeneralPurpose {
-	static Pair getIP(String comp, boolean suffixNeeded) {
+	static Pair<String> getIP(String comp, boolean suffixNeeded) {
 		String firstTryComp, secondTryComp;
 		Pair<String> pair = new Pair<>();
 		pair.setFirst(comp);

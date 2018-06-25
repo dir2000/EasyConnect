@@ -12,6 +12,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.Properties;
 
 import javax.management.RuntimeErrorException;
@@ -20,6 +21,7 @@ import javax.swing.JOptionPane;
 class DBComm {
 	private static Properties props;
 	private static Connection conn;
+	private static HashMap<String, FieldDescription> fieldsDescriptions;
 
 	static void init(MainFrame frame) {
 		readDatabaseProperties();		
@@ -33,10 +35,7 @@ class DBComm {
 		try {
 			return DriverManager.getConnection(url);
 		} catch (SQLException ex) {
-			//for (Throwable t : ex)
-				//JOptionPane.showMessageDialog(null, t.getStackTrace(), "Connection error", JOptionPane.ERROR_MESSAGE);
-			//System.exit(1);
-				throw new RuntimeException(ex);
+			throw new RuntimeException(ex);
 		}
 	}
 
@@ -71,14 +70,31 @@ class DBComm {
 				+ " IP VARCHAR(15),"
 				+ " IP_Check_Date Date,"
 				+ " Orgs VARCHAR(256));";
+		//String command2 = "ALTER TABLE MainTable DROP COLUMN IF EXISTS IP_Act_Date";
+		String command3 = "ALTER TABLE MainTable ADD COLUMN IF NOT EXISTS IP_Update_Date Date AFTER IP";
 		try {
 			Statement stat = conn.createStatement();
 			stat.executeUpdate(command);
+			//stat.executeUpdate(command2);
+			stat.executeUpdate(command3);
 		} catch (SQLException ex) {
 			for (Throwable t : ex)
 				JOptionPane.showMessageDialog(null, t.getStackTrace(), "SQL exception", JOptionPane.ERROR_MESSAGE);
 			System.out.println(command);
 			System.exit(1);
 		}
+		
+		fieldsDescriptions = new HashMap<>();
+		fieldsDescriptions.put("ID", new FieldDescription("ID", "ID", int.class, 1, false));
+		fieldsDescriptions.put("PERSON", new FieldDescription("PERSON", "Person", String.class, 2, true));
+		fieldsDescriptions.put("COMP", new FieldDescription("COMP", "Computer", String.class, 3, true));
+		fieldsDescriptions.put("IP", new FieldDescription("IP", "IP", String.class, 4, true));		
+		fieldsDescriptions.put("IP_CHECK_DATE", new FieldDescription("IP_CHECK_DATE", "IP check date", java.sql.Date.class, 5, true));
+		fieldsDescriptions.put("IP_UPDATE_DATE", new FieldDescription("IP_UPDATE_DATE", "IP update date", java.sql.Date.class, 6, true));
+		fieldsDescriptions.put("ORGS", new FieldDescription("ORGS", "Organisations", String.class, 7, true));
+	}
+	
+	static FieldDescription getFieldDescription(String name) {
+		return fieldsDescriptions.get(name);
 	}
 }
