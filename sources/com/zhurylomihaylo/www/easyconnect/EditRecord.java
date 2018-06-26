@@ -30,14 +30,14 @@ class EditRecord extends JDialog {
 	MainFrame owner;
 	private int id;
 	private JTextField tfPerson;
-	private JTextField tfIP;
 	private JTextField tfComp;
 	Date ip_Update_Date;	
 	Date ip_Check_Date;
 	private JTextField tfOrgs;
+	private JFormattedTextField tfIP;
 
 	EditRecord(MainFrame owner) {
-		super(owner, "Edit record", true);
+		super(owner, "Insert new record", true);
 		this.owner = owner;
 		buildGUI();
 	}
@@ -109,6 +109,7 @@ class EditRecord extends JDialog {
 		this.ip_Check_Date = ip_Check_Date;
 		this.ip_Update_Date = ip_Update_Date;
 		tfOrgs.setText(orgs);
+		setTitle("Update record");
 	}
 
 	@Override
@@ -125,6 +126,21 @@ class EditRecord extends JDialog {
 		super.setVisible(b);
 	}
 
+	private ActionListener defineComputerNameListener() {
+		return new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				String ip = tfIP.getText();
+				if (ip ==  null || ip.equals("") || ip.equals("   .   .   .   ")) {
+					JOptionPane.showMessageDialog(EditRecord.this, "The IP-Address field is empty.");
+					return;
+				}
+				String comp = GeneralPurpose.getComp(ip);
+				if (comp == null)
+					JOptionPane.showMessageDialog(EditRecord.this, "Cannot resolve computer name for IP-address: " + ip);
+			}
+		};
+	}
+	
 	private void buildGUI() {
 		JPanel panel = new JPanel();
 		getContentPane().add(panel);
@@ -139,11 +155,8 @@ class EditRecord extends JDialog {
 		tfPerson.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		tfPerson.setColumns(10);
 	
-		tfIP = new JTextField();
-		tfIP.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		tfIP.setColumns(10);
-	
 		JButton btnDefineComputerName = new JButton("Define computer name");
+		btnDefineComputerName.addActionListener(defineComputerNameListener());
 	
 		JLabel lblComputerName = new JLabel("Computer name");
 		lblComputerName.setFont(new Font("Tahoma", Font.PLAIN, 16));
@@ -160,6 +173,15 @@ class EditRecord extends JDialog {
 		tfOrgs = new JTextField();
 		tfOrgs.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		tfOrgs.setColumns(10);
+		
+//		MaskFormatter mf = null;
+//		try {
+//			mf = new MaskFormatter("###.###.###.###");
+//		} catch (ParseException e) {
+//			throw new RuntimeException(e);
+//		}
+		tfIP = new JFormattedTextField(new IPAddressFormatter());
+		tfIP.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		GroupLayout gl_panel = new GroupLayout(panel);
 		gl_panel.setHorizontalGroup(
 			gl_panel.createParallelGroup(Alignment.TRAILING)
@@ -170,21 +192,20 @@ class EditRecord extends JDialog {
 						.addGroup(gl_panel.createSequentialGroup()
 							.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
 								.addGroup(gl_panel.createSequentialGroup()
-									.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING, false)
-										.addComponent(lblComputerName, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-										.addGroup(Alignment.LEADING, gl_panel.createParallelGroup(Alignment.TRAILING, false)
-											.addComponent(lblPerson, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-											.addComponent(lblIpaddress, GroupLayout.DEFAULT_SIZE, 111, Short.MAX_VALUE)))
+									.addGroup(gl_panel.createParallelGroup(Alignment.LEADING, false)
+										.addComponent(lblComputerName, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+										.addComponent(lblPerson, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+										.addComponent(lblIpaddress, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 111, Short.MAX_VALUE))
 									.addGap(18))
 								.addGroup(gl_panel.createSequentialGroup()
-									.addComponent(lblOrgs, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+									.addComponent(lblOrgs, GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
 									.addGap(26)))
 							.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
 								.addComponent(tfOrgs, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 412, Short.MAX_VALUE)
 								.addComponent(tfComp, GroupLayout.DEFAULT_SIZE, 412, Short.MAX_VALUE)
 								.addComponent(btnDefineComputerName)
-								.addComponent(tfIP, GroupLayout.DEFAULT_SIZE, 412, Short.MAX_VALUE)
-								.addComponent(tfPerson, GroupLayout.DEFAULT_SIZE, 412, Short.MAX_VALUE))))
+								.addComponent(tfPerson, GroupLayout.DEFAULT_SIZE, 412, Short.MAX_VALUE)
+								.addComponent(tfIP, GroupLayout.DEFAULT_SIZE, 412, Short.MAX_VALUE))))
 					.addContainerGap())
 		);
 		gl_panel.setVerticalGroup(

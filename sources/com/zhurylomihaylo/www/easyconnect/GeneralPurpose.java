@@ -32,4 +32,16 @@ class GeneralPurpose {
 		return pair;
 	}
 
+	static String getComp(String ip) {
+		String comp = null;
+		try {
+			InetAddress address = InetAddress.getByName(ip);
+			comp = address.getHostName();
+			if (comp.equals(ip))
+				comp = null;
+		} catch (UnknownHostException e) {
+		}
+		
+		return comp;
+	}
 }
