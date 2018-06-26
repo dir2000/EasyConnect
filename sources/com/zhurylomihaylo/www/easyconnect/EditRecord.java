@@ -6,6 +6,8 @@ import java.awt.BorderLayout;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.Font;
 import java.text.ParseException;
 
@@ -16,7 +18,10 @@ import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -27,8 +32,8 @@ class EditRecord extends JDialog {
 	private JTextField tfPerson;
 	private JTextField tfIP;
 	private JTextField tfComp;
+	Date ip_Update_Date;	
 	Date ip_Check_Date;
-	Date ip_Update_Date; 
 	private JTextField tfOrgs;
 
 	EditRecord(MainFrame owner) {
@@ -37,33 +42,116 @@ class EditRecord extends JDialog {
 		buildGUI();
 	}
 
+	private ActionListener okListener() {
+		return new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				String errText = "";
+				String person = tfPerson.getText();
+				if (person ==  null || person.equals("")) {
+					errText = errText + "The person field is empty.";
+				}
+				String comp = tfComp.getText();
+				if (comp ==  null || comp.equals("")) {
+					if (!errText.equals(""))
+						errText = errText + "\n";
+					errText = errText + "The computer field is empty.";
+				}				
+				if (!errText.equals("")) {
+					JOptionPane.showMessageDialog(EditRecord.this, errText, "Check", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				
+				String ip = tfIP.getText();
+				String orgs = tfOrgs.getText();
+				
+				Connection conn = DBComm.getConnection();	
+				String query;
+				if (id == 0)
+					query = "INSERT INTO MainTable VALUES(NULL,?,?,?,?,?,?)";
+				else
+					query = "UPDATE MainTable SET Person = ?, Comp = ?, IP = ?, IP_Update_Date = ?, IP_Check_Date = ?, Orgs = ? WHERE Id = ?";
+				try (PreparedStatement st = conn.prepareStatement(query);) {
+					st.setString(1, person);
+					st.setString(2, comp);
+					st.setString(3, ip);
+					st.setDate(4, ip_Update_Date);
+					st.setDate(5, ip_Check_Date);
+					st.setString(6, orgs);
+					if (id != 0)
+						st.setInt(7, id);
+					
+					st.executeUpdate();
+				} catch (SQLException e) {
+					throw new RuntimeException(e);
+				}
+				
+				owner.getDataTableModel().refreshData();
+				owner.getDataTableModel().fireTableDataChanged();
+				
+				EditRecord.this.setVisible(false);
+			}
+		};
+	}
+
+	private ActionListener cancelListener() {
+		return new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				EditRecord.this.setVisible(false);
+			}
+		};
+	}
+
+	void populate(int id, String person, String ip, String comp, Date ip_Check_Date, Date ip_Update_Date, String orgs) {
+		this.id = id;
+		tfPerson.setText(person);
+		tfIP.setText(ip);
+		tfComp.setText(comp);
+		this.ip_Check_Date = ip_Check_Date;
+		this.ip_Update_Date = ip_Update_Date;
+		tfOrgs.setText(orgs);
+	}
+
+	@Override
+	public void setVisible(boolean b) {
+		if (b == false) {
+			id = 0;
+			tfPerson.setText(null);
+			tfIP.setText(null);
+			tfComp.setText(null);
+			ip_Check_Date = new Date(0);
+			ip_Update_Date = new Date(0);
+			tfOrgs.setText(null);
+		}
+		super.setVisible(b);
+	}
+
 	private void buildGUI() {
 		JPanel panel = new JPanel();
 		getContentPane().add(panel);
-
+	
 		JLabel lblPerson = new JLabel("Person");
 		lblPerson.setFont(new Font("Tahoma", Font.PLAIN, 16));
-
+	
 		JLabel lblIpaddress = new JLabel("IP-Address");
 		lblIpaddress.setFont(new Font("Tahoma", Font.PLAIN, 16));
-
+	
 		tfPerson = new JTextField();
 		tfPerson.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		tfPerson.setColumns(10);
-
+	
 		tfIP = new JTextField();
 		tfIP.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		tfIP.setColumns(10);
-
+	
 		JButton btnDefineComputerName = new JButton("Define computer name");
-
+	
 		JLabel lblComputerName = new JLabel("Computer name");
 		lblComputerName.setFont(new Font("Tahoma", Font.PLAIN, 16));
-
+	
 		tfComp = new JTextField();
 		tfComp.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		tfComp.setColumns(10);
-
+	
 		JPanel pnlButtons = new JPanel();
 		
 		JLabel lblOrgs = new JLabel("Organisations");
@@ -124,62 +212,18 @@ class EditRecord extends JDialog {
 					.addComponent(pnlButtons, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 					.addContainerGap())
 		);
-
+	
 		JButton btnOK = new JButton("OK");
 		btnOK.addActionListener(okListener());
 		btnOK.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		pnlButtons.add(btnOK);
-
+	
 		JButton btnCancel = new JButton("Cancel");
 		btnCancel.addActionListener(cancelListener());
 		btnCancel.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		pnlButtons.add(btnCancel);
 		panel.setLayout(gl_panel);
-
+	
 		pack();
-	}
-
-	private ActionListener okListener() {
-		return new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				String errText = "";
-				String person = tfPerson.getText();
-				if (person ==  null || person.equals("")) {
-					errText = errText + "Åhe person field is empty.";
-				}
-			}
-		};
-	}
-
-	private ActionListener cancelListener() {
-		return new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				EditRecord.this.setVisible(false);
-			}
-		};
-	}
-
-	void populate(int id, String person, String ip, String comp, Date ip_Check_Date, Date ip_Update_Date, String orgs) {
-		this.id = id;
-		tfPerson.setText(person);
-		tfIP.setText(ip);
-		tfComp.setText(comp);
-		this.ip_Check_Date = ip_Check_Date;
-		this.ip_Update_Date = ip_Update_Date;
-		tfOrgs.setText(orgs);
-	}
-
-	@Override
-	public void setVisible(boolean b) {
-		if (b == false) {
-			id = 0;
-			tfPerson.setText(null);
-			tfIP.setText(null);
-			tfComp.setText(null);
-			ip_Check_Date = new Date(0);
-			ip_Update_Date = new Date(0);
-			tfOrgs.setText(null);
-		}
-		super.setVisible(b);
 	}
 }

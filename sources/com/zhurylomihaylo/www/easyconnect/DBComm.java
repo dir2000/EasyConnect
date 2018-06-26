@@ -68,20 +68,17 @@ class DBComm {
 				+ " Person VARCHAR_IGNORECASE(128) NOT NULL,"
 				+ " Comp VARCHAR(128),"
 				+ " IP VARCHAR(15),"
+				+ " IP_Update_Date Date,"
 				+ " IP_Check_Date Date,"
 				+ " Orgs VARCHAR(256));";
 		//String command2 = "ALTER TABLE MainTable DROP COLUMN IF EXISTS IP_Act_Date";
 		String command3 = "ALTER TABLE MainTable ADD COLUMN IF NOT EXISTS IP_Update_Date Date AFTER IP";
-		try {
-			Statement stat = conn.createStatement();
+		try (Statement stat = conn.createStatement();){
 			stat.executeUpdate(command);
 			//stat.executeUpdate(command2);
 			stat.executeUpdate(command3);
 		} catch (SQLException ex) {
-			for (Throwable t : ex)
-				JOptionPane.showMessageDialog(null, t.getStackTrace(), "SQL exception", JOptionPane.ERROR_MESSAGE);
-			System.out.println(command);
-			System.exit(1);
+			throw new RuntimeException(ex);
 		}
 		
 		fieldsDescriptions = new HashMap<>();

@@ -70,8 +70,8 @@ class ImportDialog extends JDialog {
 	private void buildGUI() {
 		JPanel panel = new JPanel();
 		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[] {90, 90, 90, 90, 90, 0};
-		gbl_panel.rowHeights = new int[] {20, 20, 500};
+		gbl_panel.columnWidths = new int[] { 90, 90, 90, 90, 90, 0 };
+		gbl_panel.rowHeights = new int[] { 20, 20, 500 };
 		gbl_panel.columnWeights = new double[] { 1.0, 0.0, 0.0, Double.MIN_VALUE };
 		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 1.0 };
 		panel.setLayout(gbl_panel);
@@ -98,15 +98,15 @@ class ImportDialog extends JDialog {
 
 		JButton btnImport = new JButton("Import");
 		btnImport.addActionListener(importListener());
-		
-				JButton btnBrowse = new JButton("Browse...");
-				btnBrowse.addActionListener(browseListener());
-				GridBagConstraints gbc_btnBrowse = new GridBagConstraints();
-				gbc_btnBrowse.insets = new Insets(0, 0, 5, 0);
-				gbc_btnBrowse.gridx = 5;
-				gbc_btnBrowse.gridy = 0;
-				panel.add(btnBrowse, gbc_btnBrowse);
-		
+
+		JButton btnBrowse = new JButton("Browse...");
+		btnBrowse.addActionListener(browseListener());
+		GridBagConstraints gbc_btnBrowse = new GridBagConstraints();
+		gbc_btnBrowse.insets = new Insets(0, 0, 5, 0);
+		gbc_btnBrowse.gridx = 5;
+		gbc_btnBrowse.gridy = 0;
+		panel.add(btnBrowse, gbc_btnBrowse);
+
 		chckbxMegapolis = new JCheckBox("Megapolis");
 		GridBagConstraints gbc_chckbxMegapolis = new GridBagConstraints();
 		gbc_chckbxMegapolis.insets = new Insets(0, 0, 5, 5);
@@ -126,7 +126,7 @@ class ImportDialog extends JDialog {
 		JButton btnClose = new JButton("Close");
 		btnClose.addActionListener(closeListener());
 		buttonsPanel.add(btnClose);
-		
+
 		JPanel panelLog = new JPanel();
 		GridBagConstraints gbc_panelLog = new GridBagConstraints();
 		gbc_panelLog.gridwidth = 6;
@@ -137,10 +137,10 @@ class ImportDialog extends JDialog {
 		panelLog.setLayout(new GridLayout(1, 0, 0, 0));
 
 		taLogArea = new JTextArea();
-	
+
 		JScrollPane scrollPaneLog = new JScrollPane(taLogArea);
 		panelLog.add(scrollPaneLog);
-		
+
 		pack();
 	}
 
@@ -237,7 +237,7 @@ class ImportDialog extends JDialog {
 
 				owner.getDataTableModel().refreshData();
 				owner.getDataTableModel().fireTableDataChanged();
-				
+
 				appendLog("Done!");
 			}
 		};
@@ -247,9 +247,11 @@ class ImportDialog extends JDialog {
 		if (StringUtils.isNullOrEmpty(user) || StringUtils.isNullOrEmpty(comp))
 			return;
 
-		if (user.equals("Администратор") || user.equals("Внешний аудитор") || user.equals("Монитор клиентам"))
+		if (user.equals("Администратор") || user.equals("Внешний аудитор")
+				|| user.equals("Монитор клиентам"))
 			return;
-		if (comp.equals("A-GANDRABUR") || comp.equals("ZHURYLO") || comp.equals("S-KURASH") || comp.equals("V-SHTEFANIUK"))
+		if (comp.equals("A-GANDRABUR") || comp.equals("ZHURYLO") || comp.equals("S-KURASH")
+				|| comp.equals("V-SHTEFANIUK"))
 			return;
 
 		Connection conn = DBComm.getConnection();
@@ -257,40 +259,40 @@ class ImportDialog extends JDialog {
 		String cmdSel = "SELECT * FROM MainTable WHERE Person = ? AND Comp = ?";
 		String cmdUpd = "INSERT INTO MainTable (Person, Comp, IP, IP_Check_Date, Orgs) VALUES (?, ?, ?, ?, ?)";
 		Date currDate = new Date(new java.util.Date().getTime());
-		
+
 		try (PreparedStatement statSel = conn.prepareStatement(cmdSel, ResultSet.TYPE_FORWARD_ONLY,
 				ResultSet.CONCUR_UPDATABLE);
 				PreparedStatement statIns = conn.prepareStatement(cmdUpd, ResultSet.TYPE_FORWARD_ONLY,
 						ResultSet.CONCUR_UPDATABLE)) {
 			statSel.setString(1, user);
 			statSel.setString(2, comp);
-			ResultSet rs = statSel.executeQuery();
-			if (rs.next()) {
-				appendLog(user + " + " + comp + " = already exists!");
-				String orgs = rs.getString("Orgs");
-				if (!orgs.contains(fileName)) {
-					orgs = orgs + ", " + fileName;
-					rs.updateString("Orgs", orgs);
-					rs.updateRow();
-					appendLog("Organisation " + fileName + " has been added to " + user);
-				}
-			} else {
-				Pair<String> compInfo = GeneralPurpose.getIP(comp, chckbxMegapolis.isSelected());
-				String realComp = compInfo.getFirst();				
-				String ip = compInfo.getSecond();
-				if (ip == null) {
-					appendLog("Cannot resolve IP-address for " + comp);
+			try (ResultSet rs = statSel.executeQuery();) {
+				if (rs.next()) {
+					appendLog(user + " + " + comp + " = already exists!");
+					String orgs = rs.getString("Orgs");
+					if (!orgs.contains(fileName)) {
+						orgs = orgs + ", " + fileName;
+						rs.updateString("Orgs", orgs);
+						rs.updateRow();
+						appendLog("Organisation " + fileName + " has been added to " + user);
+					}
 				} else {
-					appendLog("IP-address for " + realComp + " is " + ip);
-					
-					statIns.setString(1, user); //Person
-					statIns.setString(2, realComp); //Comp
-					statIns.setString(3, ip); //IP
-					statIns.setDate(4, currDate); //Check_Date
-					statIns.setString(5, fileName); //Orgs == fileName
-					statIns.executeUpdate();					
-				}
+					Pair<String> compInfo = GeneralPurpose.getIP(comp, chckbxMegapolis.isSelected());
+					String realComp = compInfo.getFirst();
+					String ip = compInfo.getSecond();
+					if (ip == null) {
+						appendLog("Cannot resolve IP-address for " + comp);
+					} else {
+						appendLog("IP-address for " + realComp + " is " + ip);
 
+						statIns.setString(1, user); // Person
+						statIns.setString(2, realComp); // Comp
+						statIns.setString(3, ip); // IP
+						statIns.setDate(4, currDate); // Check_Date
+						statIns.setString(5, fileName); // Orgs == fileName
+						statIns.executeUpdate();
+					}
+				}
 			}
 
 		} catch (SQLException e) {
@@ -315,15 +317,15 @@ class ImportDialog extends JDialog {
 			taLogArea.append(str + "\n");
 		taLogArea.update(taLogArea.getGraphics());
 	}
-	
 
 	@Override
 	public void setVisible(boolean b) {
 		if (b)
 			restoreValues();
-		else
-			{storeValues();
-			taLogArea.setText(null);}
+		else {
+			storeValues();
+			taLogArea.setText(null);
+		}
 		super.setVisible(b);
 	}
 

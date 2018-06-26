@@ -17,13 +17,19 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
 public class DataTableModel extends AbstractTableModel {
-
+	Statement statSel;
 	ResultSet dataRowSet; // The ResultSet to interpret
 	ResultSetMetaData metadata; // Additional information about the results
 	int numcols, numrows; // How many rows and columns in the table
 	
 
 	DataTableModel() {
+		try {
+			statSel = DBComm.getConnection().createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+		
 		refreshData();
 	}
 	
@@ -39,12 +45,10 @@ public class DataTableModel extends AbstractTableModel {
 	}
 	
 	void refreshDataRowSet() {
-		Statement statSel;
+
 		try {
-			statSel = DBComm.getConnection().createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			dataRowSet = statSel.executeQuery("SELECT * FROM MainTable ORDER BY Person");
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			throw new RuntimeException(e);
 		}
 	}
