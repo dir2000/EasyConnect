@@ -21,6 +21,7 @@ import java.awt.GridLayout;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
@@ -66,8 +67,22 @@ class EditRecord extends JDialog {
 				
 				Connection conn = DBComm.getConnection();	
 				String query;
-				if (id == 0)
+				if (id == 0) {
+					query = "SELECT * FROM MainTable WHERE Person = ? AND Comp = ?";
+					try (PreparedStatement statSel = conn.prepareStatement(query);){
+						statSel.setString(1, person);
+						statSel.setString(2, comp);
+						try (ResultSet rs = statSel.executeQuery();) {
+							if (rs.next()) {
+								JOptionPane.showMessageDialog(EditRecord.this, "The database record with this person (" + person + ") and computer name (" + comp + ") already exists!", "Check", JOptionPane.ERROR_MESSAGE);
+								return;
+							}
+						}
+					} catch (Exception e) {
+						// TODO: handle exception
+					}
 					query = "INSERT INTO MainTable VALUES(NULL,?,?,?,?,?,?)";
+				}
 				else
 					query = "UPDATE MainTable SET Person = ?, Comp = ?, IP = ?, IP_Update_Date = ?, IP_Check_Date = ?, Orgs = ? WHERE Id = ?";
 				try (PreparedStatement st = conn.prepareStatement(query);) {
@@ -137,6 +152,8 @@ class EditRecord extends JDialog {
 				String comp = GeneralPurpose.getComp(ip);
 				if (comp == null)
 					JOptionPane.showMessageDialog(EditRecord.this, "Cannot resolve computer name for IP-address: " + ip);
+				else
+					tfComp.setText(comp);
 			}
 		};
 	}
