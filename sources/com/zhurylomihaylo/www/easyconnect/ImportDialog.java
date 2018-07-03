@@ -257,7 +257,7 @@ class ImportDialog extends JDialog {
 		Connection conn = DBComm.getConnection();
 
 		String cmdSel = "SELECT * FROM MainTable WHERE Person = ? AND Comp = ?";
-		String cmdUpd = "INSERT INTO MainTable (Person, Comp, IP, IP_Check_Date, Orgs) VALUES (?, ?, ?, ?, ?)";
+		String cmdUpd = "INSERT INTO MainTable (Person, Comp, IP, IP_Update_Date, IP_Check_Date, Orgs) VALUES (?, ?, ?, ?, ?, ?)";
 		Date currDate = new Date(new java.util.Date().getTime());
 
 		try (PreparedStatement statSel = conn.prepareStatement(cmdSel, ResultSet.TYPE_FORWARD_ONLY,
@@ -288,8 +288,9 @@ class ImportDialog extends JDialog {
 						statIns.setString(1, user); // Person
 						statIns.setString(2, realComp); // Comp
 						statIns.setString(3, ip); // IP
-						statIns.setDate(4, currDate); // Check_Date
-						statIns.setString(5, fileName); // Orgs == fileName
+						statIns.setDate(4, currDate); // IP_Update_Date
+						statIns.setDate(5, currDate); // IP_Check_Date
+						statIns.setString(6, fileName); // Orgs == fileName
 						statIns.executeUpdate();
 					}
 				}

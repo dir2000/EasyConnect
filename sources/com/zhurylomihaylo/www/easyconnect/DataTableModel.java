@@ -75,22 +75,22 @@ public class DataTableModel extends AbstractTableModel {
 //		this.dataRowSet.addRowSetListener(listener);
 //	}
 
-	void insertRow(String coffeeName, int supplierID, float price, int sales, int total) throws SQLException {
-
-		try {
-			this.dataRowSet.moveToInsertRow();
-			this.dataRowSet.updateString("COF_NAME", coffeeName);
-			this.dataRowSet.updateInt("SUP_ID", supplierID);
-			this.dataRowSet.updateFloat("PRICE", price);
-			this.dataRowSet.updateInt("SALES", sales);
-			this.dataRowSet.updateInt("TOTAL", total);
-			this.dataRowSet.insertRow();
-			this.dataRowSet.moveToCurrentRow();
-		} catch (SQLException e) {
-			// JDBCTutorialUtilities.printSQLException(e);
-			throw new RuntimeException(e);
-		}
-	}
+//	void insertRow(String coffeeName, int supplierID, float price, int sales, int total) throws SQLException {
+//
+//		try {
+//			this.dataRowSet.moveToInsertRow();
+//			this.dataRowSet.updateString("COF_NAME", coffeeName);
+//			this.dataRowSet.updateInt("SUP_ID", supplierID);
+//			this.dataRowSet.updateFloat("PRICE", price);
+//			this.dataRowSet.updateInt("SALES", sales);
+//			this.dataRowSet.updateInt("TOTAL", total);
+//			this.dataRowSet.insertRow();
+//			this.dataRowSet.moveToCurrentRow();
+//		} catch (SQLException e) {
+//			// JDBCTutorialUtilities.printSQLException(e);
+//			throw new RuntimeException(e);
+//		}
+//	}
 
 	void close() {
 		try {

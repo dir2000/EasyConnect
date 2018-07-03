@@ -51,7 +51,7 @@ class DBComm {
 			}
 		} else {
 			props.setProperty("jdbc.drivers", "org.h2.Driver");
-			props.setProperty("jdbc.url", "jdbc:h2:./database");
+			props.setProperty("jdbc.url", "jdbc:h2:./database;IGNORECASE=TRUE");
 		}
 		String drivers = props.getProperty("jdbc.drivers");
 		if (drivers != null)

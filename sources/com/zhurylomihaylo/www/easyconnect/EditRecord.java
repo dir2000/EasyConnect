@@ -50,37 +50,37 @@ class EditRecord extends JDialog {
 				String person = tfPerson.getText();
 				if (person ==  null || person.equals("")) {
 					errText = errText + "The person field is empty.";
+				} else {
+					person = person.trim();
 				}
 				String comp = tfComp.getText();
 				if (comp ==  null || comp.equals("")) {
 					if (!errText.equals(""))
 						errText = errText + "\n";
 					errText = errText + "The computer field is empty.";
+				} else {
+					comp = comp.trim();
 				}				
 				if (!errText.equals("")) {
 					JOptionPane.showMessageDialog(EditRecord.this, errText, "Check", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 				
-				String ip = tfIP.getText();
-				String orgs = tfOrgs.getText();
+				String ip = tfIP.getText().trim();
+				String orgs = tfOrgs.getText().trim();
 				
 				Connection conn = DBComm.getConnection();	
 				String query;
 				if (id == 0) {
-					query = "SELECT * FROM MainTable WHERE Person = ? AND Comp = ?";
-					try (PreparedStatement statSel = conn.prepareStatement(query);){
-						statSel.setString(1, person);
-						statSel.setString(2, comp);
-						try (ResultSet rs = statSel.executeQuery();) {
-							if (rs.next()) {
-								JOptionPane.showMessageDialog(EditRecord.this, "The database record with this person (" + person + ") and computer name (" + comp + ") already exists!", "Check", JOptionPane.ERROR_MESSAGE);
-								return;
-							}
-						}
-					} catch (Exception e) {
-						// TODO: handle exception
+					int exId = getAnExistingId(person, comp, conn);
+					if (exId != -1) {
+						JOptionPane.showMessageDialog(
+								EditRecord.this, "The database record with this person (" + person
+										+ ") and computer name (" + comp + ") already exists!",
+								"Check", JOptionPane.ERROR_MESSAGE);
+						return;
 					}
+					
 					query = "INSERT INTO MainTable VALUES(NULL,?,?,?,?,?,?)";
 				}
 				else
@@ -96,15 +96,27 @@ class EditRecord extends JDialog {
 						st.setInt(7, id);
 					
 					st.executeUpdate();
+					
+					id = getAnExistingId(person, comp, conn);
 				} catch (SQLException e) {
 					throw new RuntimeException(e);
 				}
 				
-				owner.getDataTableModel().refreshData();
-				owner.getDataTableModel().fireTableDataChanged();
-				
+				DataTableModel model = owner.getDataTableModel();
+				model.refreshData();
+				model.fireTableDataChanged();
+
+				// https://stackoverflow.com/questions/22066387/how-to-search-an-element-in-a-jtable-java
+				int idOrder = DBComm.getFieldDescription("ID").getOrder() - 1;
+				for (int i = 0; i < model.getRowCount(); i++) {// For each row
+					if (model.getValueAt(i, idOrder).equals(id)) {
+						owner.getDataTable().setRowSelectionInterval(i, i);
+					}
+				}
+
 				EditRecord.this.setVisible(false);
 			}
+
 		};
 	}
 
@@ -158,6 +170,24 @@ class EditRecord extends JDialog {
 		};
 	}
 	
+	private int getAnExistingId(String person, String comp, Connection conn) {
+		String query;
+		query = "SELECT * FROM MainTable WHERE Person = ? AND Comp = ?";
+		try (PreparedStatement statSel = conn.prepareStatement(query);){
+			statSel.setString(1, person);
+			statSel.setString(2, comp);
+			try (ResultSet rs = statSel.executeQuery();) {
+				if (rs.next()) {
+					return rs.getInt("Id");
+				}
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+		
+		return -1;
+	}
+
 	private void buildGUI() {
 		JPanel panel = new JPanel();
 		getContentPane().add(panel);
@@ -264,4 +294,5 @@ class EditRecord extends JDialog {
 	
 		pack();
 	}
+	
 }
