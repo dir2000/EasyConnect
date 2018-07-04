@@ -116,13 +116,13 @@ public class OptionsDialog extends JDialog {
 	}
 	
 	private void restoreValues() {
-		Object filePathStr = Props.get("remoteProgramPath");
+		String filePathStr = Props.get("remoteProgramPath");
 		if (filePathStr != null)
-			filePath.setText((String) filePathStr);
+			filePath.setText(filePathStr);
 	} 
 	
 	private void storeValues() {
-		Props.put("remoteProgramPath", filePath.getText());
+		Props.set("remoteProgramPath", filePath.getText());
 	}
 	
 	private ActionListener browseListener() {

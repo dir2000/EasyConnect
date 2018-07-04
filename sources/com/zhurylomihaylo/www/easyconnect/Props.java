@@ -7,32 +7,52 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 class Props {
-	static Properties props = new Properties();
-	static private String fileName = "program.properties";
+	static private String fileName;	
+	static Properties props;
+	
+	static {
+		fileName = "program.properties";
+		
+		props = new Properties();
+		//default values
+		props.setProperty("jdbc.drivers", "org.h2.Driver");
+		props.setProperty("jdbc.url", "jdbc:h2:./database;IGNORECASE=TRUE");
+	}
 	
 	static void init() {
 		File file = new File(fileName);
 		if (file.exists()) {
+			Properties fileProps = new Properties();
 			try(InputStream in = new FileInputStream(fileName)) {
-				props.load(in);
+				fileProps.load(in);
 			} catch (FileNotFoundException e) {
 				throw new RuntimeException(e);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
+			
+			for (Map.Entry<Object, Object> e : props.entrySet()) {
+				  String key = (String) e.getKey();
+				  if (fileProps.getProperty(key) == null)
+					  fileProps.setProperty(key, (String) e.getValue());
+				}
+		    
+			props = fileProps;
 		}
 		
 	}
 	
-	static Object get(Object key) {
-		return  props.get(key);
+	static String get(String key) {
+		return  props.getProperty(key);
 	}
 
-	static void put(Object key, Object value) {
-		props.put(key, value);
+	static void set(String key, String value) {
+		props.setProperty(key, value);
 	}
 	
 	static void store() {

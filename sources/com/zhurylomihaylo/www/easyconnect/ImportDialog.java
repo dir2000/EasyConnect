@@ -145,13 +145,13 @@ class ImportDialog extends JDialog {
 	}
 
 	private void restoreValues() {
-		Object filePathStr = Props.get("filePath");
+		String filePathStr = Props.get("filePath");
 		if (filePathStr != null)
-			filePath.setText((String) filePathStr);
+			filePath.setText(filePathStr);
 	}
 
 	private void storeValues() {
-		Props.put("filePath", filePath.getText());
+		Props.set("filePath", filePath.getText());
 	}
 
 	private ActionListener browseListener() {

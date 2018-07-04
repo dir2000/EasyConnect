@@ -59,12 +59,27 @@ class MainFrame extends JFrame {
 	private JLabel lblFilter;
 	private JButton btnClearFilter;
 	private TableRowSorter<TableModel> rowSorter;
+	private Thread thrIPRefresher;
 
 	MainFrame() {
 		Props.init();
 		DBComm.init(this);
 		buildGUI();
 		refreshIPs();
+	}
+
+	private void refreshIPs() {
+		IPRefresher ipr = new IPRefresher();
+		thrIPRefresher = new Thread(ipr);
+		thrIPRefresher.start();
+	}
+
+	DataTableModel getDataTableModel() {
+		return dataTableModel;
+	}
+
+	JTable getDataTable() {
+		return dataTable;
 	}
 
 	private void actionOnClose() {
@@ -81,6 +96,9 @@ class MainFrame extends JFrame {
 						JOptionPane.showMessageDialog(MainFrame.this, t.getStackTrace(), "Connection closing error",
 								JOptionPane.ERROR_MESSAGE);
 				}
+				
+				if (thrIPRefresher.isAlive())
+					thrIPRefresher.interrupt();
 			}
 		});
 	}
@@ -135,19 +153,19 @@ class MainFrame extends JFrame {
 					// // your valueChanged overridden method
 					String comp = (String) dataTableModel.getValueAt(row, 2);
 					// JOptionPane.showMessageDialog(MainFrame.this, comp);
-					Object filePathOb = Props.get("remoteProgramPath");
+					String filePathOb = Props.get("remoteProgramPath");
 					if (filePathOb == null || filePathOb.equals("")) {
 						JOptionPane.showMessageDialog(MainFrame.this,
 								"Use \"Options\" menu to set remote program path!");
 						return;
 					}
-					File file = new File((String) filePathOb);
+					File file = new File(filePathOb);
 					if (!file.exists()) {
 						JOptionPane.showMessageDialog(MainFrame.this,
 								"Remote access program \"" + filePathOb + "\" does not exist.");
 						return;
 					}
-					String command = (String) filePathOb + " " + comp;
+					String command = filePathOb + " " + comp;
 					try {
 						Runtime.getRuntime().exec(command);
 					} catch (IOException e) {
@@ -173,10 +191,6 @@ class MainFrame extends JFrame {
 		};
 	}
 
-	DataTableModel getDataTableModel() {
-		return dataTableModel;
-	}
-
 	private DocumentListener filterListener() {
 		return new DocumentListener() {
 	
@@ -189,7 +203,7 @@ class MainFrame extends JFrame {
 				if (text.trim().length() == 0) {
 					rowSorter.setRowFilter(null);
 				} else {
-					rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+					rowSorter.setRowFilter(RowFilter.regexFilter("(?i)(?u)" + text));
 				}
 			}
 	
@@ -200,7 +214,7 @@ class MainFrame extends JFrame {
 				if (text.trim().length() == 0) {
 					rowSorter.setRowFilter(null);
 				} else {
-					rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+					rowSorter.setRowFilter(RowFilter.regexFilter("(?i)(?u)" + text));
 				}
 			}
 	
@@ -219,17 +233,6 @@ class MainFrame extends JFrame {
 				rowSorter.setRowFilter(null);
 			}
 		};
-	}
-
-	private void refreshIPs() {
-		IPRefresher ipr = new IPRefresher();
-		Thread thr = new Thread(ipr);
-		thr.setDaemon(true);
-		thr.start();
-	}
-
-	JTable getDataTable() {
-		return dataTable;
 	}
 
 	private void buildGUI() {

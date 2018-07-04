@@ -24,14 +24,14 @@ class DBComm {
 	private static HashMap<String, FieldDescription> fieldsDescriptions;
 
 	static void init(MainFrame frame) {
-		readDatabaseProperties();		
+		initDriver();		
 		conn = createConnection();
 		checkSchema();
 	}
 
 	static Connection createConnection() {
 		
-		String url = props.getProperty("jdbc.url");
+		String url = Props.get("jdbc.url");
 		try {
 			return DriverManager.getConnection(url);
 		} catch (SQLException ex) {
@@ -39,23 +39,9 @@ class DBComm {
 		}
 	}
 
-	private static void readDatabaseProperties() {
-		props = new Properties();
-
-		Path path = Paths.get("database.properties");
-		if (Files.exists(path) && Files.isReadable(path)) {
-			try (InputStream in = Files.newInputStream(Paths.get("database.properties"))) {
-				props.load(in);
-			} catch (IOException ex) {
-				JOptionPane.showMessageDialog(null, ex.getStackTrace(), "File read error", JOptionPane.ERROR_MESSAGE);
-			}
-		} else {
-			props.setProperty("jdbc.drivers", "org.h2.Driver");
-			props.setProperty("jdbc.url", "jdbc:h2:./database;IGNORECASE=TRUE");
-		}
-		String drivers = props.getProperty("jdbc.drivers");
-		if (drivers != null)
-			System.setProperty("jdbc.drivers", drivers);
+	private static void initDriver() {
+		String drivers = Props.get("jdbc.drivers");
+		System.setProperty("jdbc.drivers", drivers);
 	}
 
 	static Connection getConnection() {
