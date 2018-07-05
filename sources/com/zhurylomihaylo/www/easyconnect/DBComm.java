@@ -59,7 +59,7 @@ class DBComm {
 				+ " IP_Check_Date Date,"
 				+ " Orgs VARCHAR(256));";
 		//String command2 = "ALTER TABLE MainTable DROP COLUMN IF EXISTS IP_Act_Date";
-		//String command3 = "ALTER TABLE MainTable ADD COLUMN IF NOT EXISTS IP_Update_Date Date AFTER IP";
+		//String command3 = "ALTER TABLE MainTable ADD COLUMN IF NOT EXISTS DeletionMark BOOLEAN NOT NULL DEFAULT false AFTER Id";
 		try (Statement stat = conn.createStatement();){
 			stat.executeUpdate(command);
 			//stat.executeUpdate(command2);
@@ -71,7 +71,7 @@ class DBComm {
 		//String name, String header, Class type, int order, boolean visible
 		fieldsDescriptions = new HashMap<>();
 		fieldsDescriptions.put("ID", new FieldDescription("ID", "ID", int.class, 1, false));
-		fieldsDescriptions.put("DELETIONMARK", new FieldDescription("DeletionMark", "X", boolean.class, 2, true));
+		fieldsDescriptions.put("DELETIONMARK", new FieldDescription("DELETIONMARK", "X", boolean.class, 2, true));
 		fieldsDescriptions.put("PERSON", new FieldDescription("PERSON", "Person", String.class, 3, true));
 		fieldsDescriptions.put("COMP", new FieldDescription("COMP", "Computer", String.class, 4, true));
 		fieldsDescriptions.put("IP", new FieldDescription("IP", "IP", String.class, 5, true));		

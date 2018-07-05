@@ -28,6 +28,7 @@ import javax.swing.RowFilter;
 import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.JMenuBar;
@@ -344,16 +345,23 @@ class MainFrame extends JFrame {
 		actionOnClose();
 	
 		dataTableModel = new DataTableModel();
+		
+		//
+		
 		dataTable = new JTable(dataTableModel);
 		dataTable.addMouseListener(doubleClickListener());
 		
 		DeletionMarkCellRenderer renderer = new DeletionMarkCellRenderer();
 		String header = DBComm.getFieldDescription("DELETIONMARK").getHeader();
-		dataTable.getColumn(header).setCellRenderer(renderer);
-	
+		TableColumn column = dataTable.getColumn(header); 
+		column.setCellRenderer(renderer);
+		column.setMaxWidth(25);
+		
 		rowSorter = new TableRowSorter<>(dataTableModel);
 		dataTable.setRowSorter(rowSorter);
-	
+		
+		//
+		
 		controlsPanel = new JPanel();
 		getContentPane().add(controlsPanel, BorderLayout.NORTH);
 		controlsPanel.setLayout(new BoxLayout(controlsPanel, BoxLayout.Y_AXIS));
