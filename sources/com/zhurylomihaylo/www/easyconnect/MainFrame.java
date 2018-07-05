@@ -13,6 +13,8 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import javax.swing.JButton;
@@ -42,7 +44,7 @@ class MainFrame extends JFrame {
 	private JButton impButt;
 	private JDialog impDialog;
 	private JDialog optDialog;
-	private JDialog editRecordDialog;
+	private EditRecord editRecordDialog;
 	private JTable dataTable;
 	private JMenuItem mntmExit;
 	private JMenuBar menuBar;
@@ -52,7 +54,7 @@ class MainFrame extends JFrame {
 	private JPanel buttonsPanel;
 	private JButton btnInsert;
 	private JButton btnEdit;
-	private JButton btnDelete;
+	private JButton btnDeletionMark;
 	private JButton btnRefresh;
 	private JPanel controlsPanel;
 	private JTextField tfFilter;
@@ -151,7 +153,8 @@ class MainFrame extends JFrame {
 				int row = table.rowAtPoint(point);
 				if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
 					// // your valueChanged overridden method
-					String comp = (String) dataTableModel.getValueAt(row, 2);
+					int order = DBComm.getFieldDescription("COMP").getOrder();
+					String comp = (String) dataTableModel.getValueAt(row, order - 1);
 					// JOptionPane.showMessageDialog(MainFrame.this, comp);
 					String filePathOb = Props.get("remoteProgramPath");
 					if (filePathOb == null || filePathOb.equals("")) {
@@ -181,12 +184,94 @@ class MainFrame extends JFrame {
 	private ActionListener insertListener() {
 		return new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-
 				if (editRecordDialog == null) {
 					editRecordDialog = new EditRecord(MainFrame.this);
 					editRecordDialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 				}
 				editRecordDialog.setVisible(true); // pop up dialog
+			}
+		};
+	}
+
+	private ActionListener editListener() {
+		return new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int row = dataTable.getSelectedRow();
+				if (row == -1)
+					return;
+				
+				if (editRecordDialog == null) {
+					editRecordDialog = new EditRecord(MainFrame.this);
+					editRecordDialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+				}
+				
+				int order;
+				order = DBComm.getFieldDescription("ID").getOrder();
+				int id = (int) dataTableModel.getValueAt(row, order - 1);
+				order = DBComm.getFieldDescription("PERSON").getOrder();
+				String person = (String) dataTableModel.getValueAt(row, order - 1);
+				order = DBComm.getFieldDescription("COMP").getOrder();
+				String comp = (String) dataTableModel.getValueAt(row, order - 1);
+				order = DBComm.getFieldDescription("IP").getOrder();
+				String ip = (String) dataTableModel.getValueAt(row, order - 1);
+				order = DBComm.getFieldDescription("IP_CHECK_DATE").getOrder();
+				Date ip_Check_Date = (Date) dataTableModel.getValueAt(row, order - 1);
+				order = DBComm.getFieldDescription("IP_UPDATE_DATE").getOrder();
+				Date ip_Update_Date = (Date) dataTableModel.getValueAt(row, order - 1);
+				order = DBComm.getFieldDescription("ORGS").getOrder();
+				String orgs = (String) dataTableModel.getValueAt(row, order - 1);
+				
+				editRecordDialog.populate(id, person, comp, ip, ip_Check_Date, ip_Update_Date, orgs);
+				
+				editRecordDialog.setVisible(true); // pop up dialog				
+			}
+		};
+	}
+
+	private ActionListener deletionMarkListener() {
+		return new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int row = dataTable.getSelectedRow();
+				if (row == -1)
+					return;
+				
+				String query = "UPDATE MainTable SET DeletionMark = ? WHERE Id = ?";
+
+				int dmOrder = DBComm.getFieldDescription("DELETIONMARK").getOrder();
+				boolean dmark = (boolean) dataTableModel.getValueAt(row, dmOrder - 1);
+				dmark = !dmark;
+				
+				int idOrder = DBComm.getFieldDescription("ID").getOrder();
+				int id = (int) dataTableModel.getValueAt(row, idOrder - 1);
+				
+				Connection conn = DBComm.getConnection();
+				try (PreparedStatement st = conn.prepareStatement(query);) {
+					st.setBoolean(1, dmark);
+					st.setInt(2, id);
+					
+					st.executeUpdate();
+				} catch (SQLException ex) {
+					throw new RuntimeException(ex);
+				}
+				
+				dataTableModel.refreshData();
+				dataTableModel.fireTableDataChanged();
+				
+				for (int i = 0; i < dataTableModel.getRowCount(); i++) {// For each row
+					if (dataTableModel.getValueAt(i, idOrder - 1).equals(id)) {
+						dataTable.setRowSelectionInterval(i, i);
+					}
+				}				
+			}
+		};
+	}
+
+	private ActionListener refreshListener() {
+		return new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				dataTableModel.refreshData();
+				dataTableModel.fireTableDataChanged();
+
 			}
 		};
 	}
@@ -261,6 +346,10 @@ class MainFrame extends JFrame {
 		dataTableModel = new DataTableModel();
 		dataTable = new JTable(dataTableModel);
 		dataTable.addMouseListener(doubleClickListener());
+		
+		DeletionMarkCellRenderer renderer = new DeletionMarkCellRenderer();
+		String header = DBComm.getFieldDescription("DELETIONMARK").getHeader();
+		dataTable.getColumn(header).setCellRenderer(renderer);
 	
 		rowSorter = new TableRowSorter<>(dataTableModel);
 		dataTable.setRowSorter(rowSorter);
@@ -282,14 +371,17 @@ class MainFrame extends JFrame {
 		buttonsPanel.add(btnInsert);
 	
 		btnEdit = new JButton("Edit");
+		btnEdit.addActionListener(editListener());
 		btnEdit.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Change list item.png")));
 		buttonsPanel.add(btnEdit);
 	
-		btnDelete = new JButton("Delete");
-		btnDelete.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Delete list item.png")));
-		buttonsPanel.add(btnDelete);
+		btnDeletionMark = new JButton("Set-unset deletion mark");
+		btnDeletionMark.addActionListener(deletionMarkListener());
+		btnDeletionMark.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Set deletion mark.png")));
+		buttonsPanel.add(btnDeletionMark);
 	
 		btnRefresh = new JButton("Refresh");
+		btnRefresh.addActionListener(refreshListener());
 		btnRefresh.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Refresh.png")));
 		buttonsPanel.add(btnRefresh);
 

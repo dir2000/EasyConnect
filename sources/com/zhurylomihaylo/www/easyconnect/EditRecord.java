@@ -128,7 +128,7 @@ class EditRecord extends JDialog {
 		};
 	}
 
-	void populate(int id, String person, String ip, String comp, Date ip_Check_Date, Date ip_Update_Date, String orgs) {
+	void populate(int id, String person, String comp, String ip, Date ip_Check_Date, Date ip_Update_Date, String orgs) {
 		this.id = id;
 		tfPerson.setText(person);
 		tfIP.setText(ip);

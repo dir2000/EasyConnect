@@ -31,7 +31,7 @@ class IPRefresher implements Runnable {
 					rs.updateRow();
 				}
 			}
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
 

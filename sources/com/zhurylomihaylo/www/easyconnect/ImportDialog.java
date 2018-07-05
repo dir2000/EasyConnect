@@ -256,17 +256,21 @@ class ImportDialog extends JDialog {
 
 		Connection conn = DBComm.getConnection();
 
-		String cmdSel = "SELECT * FROM MainTable WHERE Person = ? AND Comp = ?";
-		String cmdUpd = "INSERT INTO MainTable (Person, Comp, IP, IP_Update_Date, IP_Check_Date, Orgs) VALUES (?, ?, ?, ?, ?, ?)";
+		String cmdSelect = "SELECT * FROM MainTable WHERE Person = ? AND Comp = ?";
+		String cmdInsert = "INSERT INTO MainTable (Person, Comp, IP, IP_Update_Date, IP_Check_Date, Orgs) VALUES (?, ?, ?, ?, ?, ?)";
 		Date currDate = new Date(new java.util.Date().getTime());
 
-		try (PreparedStatement statSel = conn.prepareStatement(cmdSel, ResultSet.TYPE_FORWARD_ONLY,
+		try (PreparedStatement statSelect = conn.prepareStatement(cmdSelect, ResultSet.TYPE_FORWARD_ONLY,
 				ResultSet.CONCUR_UPDATABLE);
-				PreparedStatement statIns = conn.prepareStatement(cmdUpd, ResultSet.TYPE_FORWARD_ONLY,
+				PreparedStatement statInsert = conn.prepareStatement(cmdInsert, ResultSet.TYPE_FORWARD_ONLY,
 						ResultSet.CONCUR_UPDATABLE)) {
-			statSel.setString(1, user);
-			statSel.setString(2, comp);
-			try (ResultSet rs = statSel.executeQuery();) {
+
+			Pair<String> compInfo = GeneralPurpose.getIP(comp, chckbxMegapolis.isSelected());
+			String realComp = compInfo.getFirst();
+			
+			statSelect.setString(1, user);
+			statSelect.setString(2, realComp);
+			try (ResultSet rs = statSelect.executeQuery();) {
 				if (rs.next()) {
 					appendLog(user + " + " + comp + " = already exists!");
 					String orgs = rs.getString("Orgs");
@@ -277,21 +281,19 @@ class ImportDialog extends JDialog {
 						appendLog("Organisation " + fileName + " has been added to " + user);
 					}
 				} else {
-					Pair<String> compInfo = GeneralPurpose.getIP(comp, chckbxMegapolis.isSelected());
-					String realComp = compInfo.getFirst();
 					String ip = compInfo.getSecond();
 					if (ip == null) {
-						appendLog("Cannot resolve IP-address for " + comp);
+						appendLog("Cannot resolve IP-address for " + comp + ". The line is skipped.");
 					} else {
-						appendLog("IP-address for " + realComp + " is " + ip);
-
-						statIns.setString(1, user); // Person
-						statIns.setString(2, realComp); // Comp
-						statIns.setString(3, ip); // IP
-						statIns.setDate(4, currDate); // IP_Update_Date
-						statIns.setDate(5, currDate); // IP_Check_Date
-						statIns.setString(6, fileName); // Orgs == fileName
-						statIns.executeUpdate();
+						statInsert.setString(1, user); // Person
+						statInsert.setString(2, realComp); // Comp
+						statInsert.setString(3, ip); // IP
+						statInsert.setDate(4, currDate); // IP_Update_Date
+						statInsert.setDate(5, currDate); // IP_Check_Date
+						statInsert.setString(6, fileName); // Orgs == fileName
+						statInsert.executeUpdate();
+						
+						appendLog("IP-address for " + realComp + " is " + ip + ". The line is imported.");						
 					}
 				}
 			}
