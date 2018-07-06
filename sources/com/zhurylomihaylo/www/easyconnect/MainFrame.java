@@ -16,6 +16,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -63,6 +64,8 @@ class MainFrame extends JFrame {
 	private JButton btnClearFilter;
 	private TableRowSorter<TableModel> rowSorter;
 	private Thread thrIPRefresher;
+	private JButton btnConnect;
+	private JMenuItem mntmDeleteMarkedRecords;
 
 	MainFrame() {
 		Props.init();
@@ -120,6 +123,25 @@ class MainFrame extends JFrame {
 		return listener;
 	}
 
+	private ActionListener deleteMarkedRecordsListener() {
+		return new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String command = "DELETE FROM MainTable WHERE DELETIONMARK = TRUE";
+				Connection conn = DBComm.getConnection();
+				try (Statement stat = conn.createStatement();){
+					int rowCount = stat.executeUpdate(command);
+					if (rowCount != 0) {
+						dataTableModel.refreshData();
+						dataTableModel.fireTableDataChanged();
+					}
+					JOptionPane.showMessageDialog(MainFrame.this, rowCount + " records were deleted.");
+				} catch (SQLException e1) {
+					throw new RuntimeException(e1);
+				} 
+			}
+		};
+	}
+
 	private ActionListener exitListener() {
 		ActionListener listener = new ActionListener() {
 			@Override
@@ -151,32 +173,14 @@ class MainFrame extends JFrame {
 			public void mousePressed(MouseEvent mouseEvent) {
 				JTable table = (JTable) mouseEvent.getSource();
 				Point point = mouseEvent.getPoint();
-				int row = table.rowAtPoint(point);
 				if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
 					// // your valueChanged overridden method
-					int order = DBComm.getFieldDescription("COMP").getOrder();
-					String comp = (String) dataTableModel.getValueAt(row, order - 1);
-					// JOptionPane.showMessageDialog(MainFrame.this, comp);
-					String filePathOb = Props.get("remoteProgramPath");
-					if (filePathOb == null || filePathOb.equals("")) {
-						JOptionPane.showMessageDialog(MainFrame.this,
-								"Use \"Options\" menu to set remote program path!");
-						return;
-					}
-					File file = new File(filePathOb);
-					if (!file.exists()) {
-						JOptionPane.showMessageDialog(MainFrame.this,
-								"Remote access program \"" + filePathOb + "\" does not exist.");
-						return;
-					}
-					String command = filePathOb + " " + comp;
-					try {
-						Runtime.getRuntime().exec(command);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
+					int row = table.convertRowIndexToModel(table.rowAtPoint(point));					
+					connectToRemote(row);
 				}
 			}
+
+			
 		};
 
 		return adapter;
@@ -200,6 +204,7 @@ class MainFrame extends JFrame {
 				int row = dataTable.getSelectedRow();
 				if (row == -1)
 					return;
+				row = dataTable.convertRowIndexToModel(row);
 				
 				if (editRecordDialog == null) {
 					editRecordDialog = new EditRecord(MainFrame.this);
@@ -235,6 +240,7 @@ class MainFrame extends JFrame {
 				int row = dataTable.getSelectedRow();
 				if (row == -1)
 					return;
+				row = dataTable.convertRowIndexToModel(row);
 				
 				String query = "UPDATE MainTable SET DeletionMark = ? WHERE Id = ?";
 
@@ -321,6 +327,44 @@ class MainFrame extends JFrame {
 		};
 	}
 
+	private ActionListener connectListener() {
+		return new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int row = dataTable.getSelectedRow();
+				if (row == -1) {
+					JOptionPane.showMessageDialog(MainFrame.this, "No row is selected.");
+					return;
+				}
+				row = dataTable.convertRowIndexToModel(row);
+				connectToRemote(row);
+			}
+		};
+	}
+
+	private void connectToRemote(int row) {
+		int order = DBComm.getFieldDescription("COMP").getOrder();
+		String comp = (String) dataTableModel.getValueAt(row, order - 1);
+		// JOptionPane.showMessageDialog(MainFrame.this, comp);
+		String filePathOb = Props.get("remoteProgramPath");
+		if (filePathOb == null || filePathOb.equals("")) {
+			JOptionPane.showMessageDialog(MainFrame.this,
+					"Use \"Options\" menu to set remote program path!");
+			return;
+		}
+		File file = new File(filePathOb);
+		if (!file.exists()) {
+			JOptionPane.showMessageDialog(MainFrame.this,
+					"Remote access program \"" + filePathOb + "\" does not exist.");
+			return;
+		}
+		String command = filePathOb + " " + comp;
+		try {
+			Runtime.getRuntime().exec(command);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	private void buildGUI() {
 		menuBar = new JMenuBar();
 		menuBar.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -331,6 +375,10 @@ class MainFrame extends JFrame {
 	
 		mntmImport = new JMenuItem("Import...");
 		mnFile.add(mntmImport);
+		
+		mntmDeleteMarkedRecords = new JMenuItem("Delete marked records");
+		mntmDeleteMarkedRecords.addActionListener(deleteMarkedRecordsListener());
+		mnFile.add(mntmDeleteMarkedRecords);
 	
 		mntmExit = new JMenuItem("Exit");
 		mnFile.add(mntmExit);
@@ -356,6 +404,11 @@ class MainFrame extends JFrame {
 		TableColumn column = dataTable.getColumn(header); 
 		column.setCellRenderer(renderer);
 		column.setMaxWidth(25);
+
+		//hide id column
+		header = DBComm.getFieldDescription("ID").getHeader();
+		column = dataTable.getColumn(header);
+		dataTable.getColumnModel().removeColumn(column);
 		
 		rowSorter = new TableRowSorter<>(dataTableModel);
 		dataTable.setRowSorter(rowSorter);
@@ -385,7 +438,7 @@ class MainFrame extends JFrame {
 	
 		btnDeletionMark = new JButton("Set-unset deletion mark");
 		btnDeletionMark.addActionListener(deletionMarkListener());
-		btnDeletionMark.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Set deletion mark.png")));
+		btnDeletionMark.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Deletion mark.png")));
 		buttonsPanel.add(btnDeletionMark);
 	
 		btnRefresh = new JButton("Refresh");
@@ -398,7 +451,7 @@ class MainFrame extends JFrame {
 
 		tfFilter = new JTextField();
 		buttonsPanel.add(tfFilter);
-		tfFilter.setColumns(20);
+		tfFilter.setColumns(15);
 		tfFilter.getDocument().addDocumentListener(filterListener());
 		
 		btnClearFilter = new JButton("Clear");
@@ -406,6 +459,11 @@ class MainFrame extends JFrame {
 		btnClearFilter.addActionListener(clearFilterListener());
 		JScrollPane scrollPane = new JScrollPane(dataTable);
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
+		
+		btnConnect = new JButton("CONNECT");
+		btnConnect.addActionListener(connectListener());
+		btnConnect.setIcon(new ImageIcon(MainFrame.class.getResource("/images/UVNC.png")));
+		getContentPane().add(btnConnect, BorderLayout.SOUTH);
 	
 		pack();
 	}
