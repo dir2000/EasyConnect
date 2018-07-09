@@ -7,62 +7,75 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.swing.JOptionPane;
+
 class Props {
-	static private String fileName;	
+	static private String fileName;
 	static Properties props;
-	
+
 	static {
-		fileName = "program.properties";
-		
+		Path dirPath = Paths.get(System.getProperty("user.home"), ".EasyConnect");
+		if (!Files.exists(dirPath)) {
+			try {
+				Files.createDirectory(dirPath);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		fileName =  Paths.get(dirPath.toString(), "program.properties").toString();
+
 		props = new Properties();
-		//default values
+		// default values
 		props.setProperty("jdbc.drivers", "org.h2.Driver");
 		props.setProperty("jdbc.url", "jdbc:h2:./database;IGNORECASE=TRUE");
 	}
-	
+
 	static void init() {
 		File file = new File(fileName);
 		if (file.exists()) {
 			Properties fileProps = new Properties();
-			try(InputStream in = new FileInputStream(fileName)) {
+			try (InputStream in = new FileInputStream(fileName)) {
 				fileProps.load(in);
 			} catch (FileNotFoundException e) {
 				throw new RuntimeException(e);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-			
+
 			for (Map.Entry<Object, Object> e : props.entrySet()) {
-				  String key = (String) e.getKey();
-				  if (fileProps.getProperty(key) == null)
-					  fileProps.setProperty(key, (String) e.getValue());
-				}
-		    
+				String key = (String) e.getKey();
+				if (fileProps.getProperty(key) == null)
+					fileProps.setProperty(key, (String) e.getValue());
+			}
+
 			props = fileProps;
 		}
-		
+
 	}
-	
+
 	static String get(String key) {
-		return  props.getProperty(key);
+		return props.getProperty(key);
 	}
 
 	static void set(String key, String value) {
 		props.setProperty(key, value);
 	}
-	
+
 	static void store() {
-		try(OutputStream out = new FileOutputStream(fileName)) {
+		try (OutputStream out = new FileOutputStream(fileName)) {
 			props.store(out, fileName);
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		
+
 	}
 }

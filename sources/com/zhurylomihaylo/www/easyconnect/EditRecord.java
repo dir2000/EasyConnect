@@ -81,7 +81,7 @@ class EditRecord extends JDialog {
 						return;
 					}
 					
-					query = "INSERT INTO MainTable VALUES(NULL,?,?,?,?,?,?)";
+					query = "INSERT INTO MainTable VALUES(NULL,false,?,?,?,?,?,?)";
 				}
 				else
 					query = "UPDATE MainTable SET Person = ?, Comp = ?, IP = ?, IP_Update_Date = ?, IP_Check_Date = ?, Orgs = ? WHERE Id = ?";
@@ -108,9 +108,12 @@ class EditRecord extends JDialog {
 
 				// https://stackoverflow.com/questions/22066387/how-to-search-an-element-in-a-jtable-java
 				int idOrder = DBComm.getFieldDescription("ID").getOrder() - 1;
+				int convertedRow;
 				for (int i = 0; i < model.getRowCount(); i++) {// For each row
 					if (model.getValueAt(i, idOrder).equals(id)) {
-						owner.getDataTable().setRowSelectionInterval(i, i);
+						convertedRow = owner.getDataTable().convertRowIndexToView(i);
+						owner.getDataTable().setRowSelectionInterval(convertedRow, convertedRow);
+						break;
 					}
 				}
 

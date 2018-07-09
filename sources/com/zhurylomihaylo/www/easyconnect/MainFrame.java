@@ -264,9 +264,11 @@ class MainFrame extends JFrame {
 				dataTableModel.refreshData();
 				dataTableModel.fireTableDataChanged();
 				
+				int convertedRow;
 				for (int i = 0; i < dataTableModel.getRowCount(); i++) {// For each row
 					if (dataTableModel.getValueAt(i, idOrder - 1).equals(id)) {
-						dataTable.setRowSelectionInterval(i, i);
+						convertedRow = dataTable.convertRowIndexToView(i);
+						dataTable.setRowSelectionInterval(convertedRow, convertedRow);
 					}
 				}				
 			}
