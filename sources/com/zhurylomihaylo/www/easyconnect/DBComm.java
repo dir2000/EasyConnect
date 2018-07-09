@@ -26,7 +26,7 @@ class DBComm {
 	static void init(MainFrame frame) {
 		initDriver();		
 		conn = createConnection();
-		checkSchema();
+		checkSchema();		
 	}
 
 	static Connection createConnection() {

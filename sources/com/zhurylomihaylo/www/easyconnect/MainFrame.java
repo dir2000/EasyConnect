@@ -66,6 +66,7 @@ class MainFrame extends JFrame {
 	private Thread thrIPRefresher;
 	private JButton btnConnect;
 	private JMenuItem mntmDeleteMarkedRecords;
+	private JPanel connectPanel;
 
 	MainFrame() {
 		Props.init();
@@ -458,14 +459,18 @@ class MainFrame extends JFrame {
 		
 		btnClearFilter = new JButton("Clear");
 		buttonsPanel.add(btnClearFilter);
+		
+		connectPanel = new JPanel();
+		controlsPanel.add(connectPanel);
+		connectPanel.setLayout(new BorderLayout(0, 0));
+		
+		btnConnect = new JButton("CONNECT");
+		connectPanel.add(btnConnect, BorderLayout.NORTH);
+		btnConnect.addActionListener(connectListener());
+		btnConnect.setIcon(new ImageIcon(MainFrame.class.getResource("/images/UVNC.png")));
 		btnClearFilter.addActionListener(clearFilterListener());
 		JScrollPane scrollPane = new JScrollPane(dataTable);
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
-		
-		btnConnect = new JButton("CONNECT");
-		btnConnect.addActionListener(connectListener());
-		btnConnect.setIcon(new ImageIcon(MainFrame.class.getResource("/images/UVNC.png")));
-		getContentPane().add(btnConnect, BorderLayout.SOUTH);
 	
 		pack();
 	}

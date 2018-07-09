@@ -17,7 +17,7 @@ import java.util.Set;
 import javax.swing.JOptionPane;
 
 class Props {
-	static private String fileName;
+	static private Path filePath;
 	static Properties props;
 
 	static {
@@ -29,19 +29,18 @@ class Props {
 				throw new RuntimeException(e);
 			}
 		}
-		fileName =  Paths.get(dirPath.toString(), "program.properties").toString();
+		filePath =  dirPath.resolve("program.properties");
 
 		props = new Properties();
 		// default values
 		props.setProperty("jdbc.drivers", "org.h2.Driver");
-		props.setProperty("jdbc.url", "jdbc:h2:./database;IGNORECASE=TRUE");
+		props.setProperty("jdbc.url", "jdbc:h2:./database;IGNORECASE=TRUE;AUTO_SERVER=TRUE");
 	}
 
 	static void init() {
-		File file = new File(fileName);
-		if (file.exists()) {
+		if (Files.exists(filePath)) {
 			Properties fileProps = new Properties();
-			try (InputStream in = new FileInputStream(fileName)) {
+			try (InputStream in = new FileInputStream(filePath.toFile())) {
 				fileProps.load(in);
 			} catch (FileNotFoundException e) {
 				throw new RuntimeException(e);
@@ -69,8 +68,8 @@ class Props {
 	}
 
 	static void store() {
-		try (OutputStream out = new FileOutputStream(fileName)) {
-			props.store(out, fileName);
+		try (OutputStream out = new FileOutputStream(filePath.toFile())) {
+			props.store(out, filePath.toString());
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
 		} catch (IOException e) {
