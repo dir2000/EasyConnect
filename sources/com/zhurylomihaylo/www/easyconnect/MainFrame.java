@@ -17,6 +17,9 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.util.Arrays;
+import java.util.Locale;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -69,6 +72,13 @@ class MainFrame extends JFrame {
 	private JPanel connectPanel;
 
 	MainFrame() {
+//		Locale [] al = DateFormat.getAvailableLocales();
+//		String [] alString = new String[al.length];
+//		for (int i = 0; i < al.length; i++) 
+//			alString[i] = al[i].toString();
+//		Arrays.sort(alString);
+//		System.out.println(Arrays.toString(alString));
+		
 		Props.init();
 		DBComm.init(this);
 		buildGUI();

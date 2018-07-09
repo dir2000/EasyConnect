@@ -2,6 +2,8 @@ package com.zhurylomihaylo.www.easyconnect;
 
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.JTable;
+
 import java.awt.BorderLayout;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -18,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -112,7 +115,13 @@ class EditRecord extends JDialog {
 				for (int i = 0; i < model.getRowCount(); i++) {// For each row
 					if (model.getValueAt(i, idOrder).equals(id)) {
 						convertedRow = owner.getDataTable().convertRowIndexToView(i);
-						owner.getDataTable().setRowSelectionInterval(convertedRow, convertedRow);
+						
+						JTable dataTable = owner.getDataTable();
+						dataTable.setRowSelectionInterval(convertedRow, convertedRow);
+						
+						Rectangle cellRect = dataTable.getCellRect(convertedRow, 0, true);
+						dataTable.scrollRectToVisible(cellRect);
+						
 						break;
 					}
 				}

@@ -34,7 +34,7 @@ class Props {
 		props = new Properties();
 		// default values
 		props.setProperty("jdbc.drivers", "org.h2.Driver");
-		props.setProperty("jdbc.url", "jdbc:h2:./database;IGNORECASE=TRUE;AUTO_SERVER=TRUE");
+		props.setProperty("jdbc.url", "jdbc:h2:./database;IGNORECASE=TRUE;AUTO_SERVER=TRUE;FILE_LOCK=FILE");
 	}
 
 	static void init() {
@@ -50,7 +50,7 @@ class Props {
 
 			for (Map.Entry<Object, Object> e : props.entrySet()) {
 				String key = (String) e.getKey();
-				if (fileProps.getProperty(key) == null)
+				//if (fileProps.getProperty(key) == null)
 					fileProps.setProperty(key, (String) e.getValue());
 			}
 
