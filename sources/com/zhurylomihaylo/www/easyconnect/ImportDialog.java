@@ -62,7 +62,7 @@ class ImportDialog extends JDialog {
 	private JCheckBox chckbxMegapolis;
 
 	public ImportDialog(MainFrame owner) {
-		super(owner, "Import dialog", true);
+		super(owner, Messages.getString("ImportDialog.ImportDialog"), true); //$NON-NLS-1$
 		this.owner = owner;
 		buildGUI();
 	}
@@ -83,7 +83,7 @@ class ImportDialog extends JDialog {
 		gbc_fileLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_fileLabel.gridx = 0;
 		gbc_fileLabel.gridy = 0;
-		JLabel fileLabel = new JLabel("File path (*.txt)");
+		JLabel fileLabel = new JLabel(Messages.getString("ImportDialog.FilePath")); //$NON-NLS-1$
 		panel.add(fileLabel, gbc_fileLabel);
 		filePath = new JTextField();
 		GridBagConstraints gbc_filePath = new GridBagConstraints();
@@ -96,10 +96,10 @@ class ImportDialog extends JDialog {
 
 		// OK button closes the dialog
 
-		JButton btnImport = new JButton("Import");
+		JButton btnImport = new JButton(Messages.getString("ImportDialog.Import")); //$NON-NLS-1$
 		btnImport.addActionListener(importListener());
 
-		JButton btnBrowse = new JButton("Browse...");
+		JButton btnBrowse = new JButton(Messages.getString("ImportDialog.Browse")); //$NON-NLS-1$
 		btnBrowse.addActionListener(browseListener());
 		GridBagConstraints gbc_btnBrowse = new GridBagConstraints();
 		gbc_btnBrowse.insets = new Insets(0, 0, 5, 0);
@@ -107,7 +107,7 @@ class ImportDialog extends JDialog {
 		gbc_btnBrowse.gridy = 0;
 		panel.add(btnBrowse, gbc_btnBrowse);
 
-		chckbxMegapolis = new JCheckBox("Megapolis");
+		chckbxMegapolis = new JCheckBox(Messages.getString("ImportDialog.Megapolis")); //$NON-NLS-1$
 		GridBagConstraints gbc_chckbxMegapolis = new GridBagConstraints();
 		gbc_chckbxMegapolis.insets = new Insets(0, 0, 5, 5);
 		gbc_chckbxMegapolis.gridx = 0;
@@ -123,7 +123,7 @@ class ImportDialog extends JDialog {
 		panel.add(buttonsPanel, gbc_buttonsPanel);
 		buttonsPanel.add(btnImport);
 
-		JButton btnClose = new JButton("Close");
+		JButton btnClose = new JButton(Messages.getString("ImportDialog.Close")); //$NON-NLS-1$
 		btnClose.addActionListener(closeListener());
 		buttonsPanel.add(btnClose);
 
@@ -145,13 +145,13 @@ class ImportDialog extends JDialog {
 	}
 
 	private void restoreValues() {
-		String filePathStr = Props.get("filePath");
+		String filePathStr = Props.get("filePath"); //$NON-NLS-1$
 		if (filePathStr != null)
 			filePath.setText(filePathStr);
 	}
 
 	private void storeValues() {
-		Props.set("filePath", filePath.getText());
+		Props.set("filePath", filePath.getText()); //$NON-NLS-1$
 	}
 
 	private ActionListener browseListener() {
@@ -159,12 +159,12 @@ class ImportDialog extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser == null) {
 					fileChooser = new JFileChooser();
-					FileFilter filter = new FileNameExtensionFilter("txt File", "txt");
+					FileFilter filter = new FileNameExtensionFilter(Messages.getString("ImportDialog.TxtFile"), "txt"); //$NON-NLS-1$ //$NON-NLS-2$
 					fileChooser.setFileFilter(filter);
 				}
 
 				String filePathStr = filePath.getText();
-				if (filePathStr != null && !filePathStr.equals("")) {
+				if (filePathStr != null && !filePathStr.equals("")) { //$NON-NLS-1$
 					File file = new File(filePathStr);
 					if (file.exists()) {
 						fileChooser.setCurrentDirectory(file);
@@ -182,30 +182,30 @@ class ImportDialog extends JDialog {
 		return new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				boolean reject = false;
-				String fileName = "";
+				String fileName = ""; //$NON-NLS-1$
 				appendLog(null);
 
 				String pathString = filePath.getText();
-				if (pathString.equals(null) || pathString.equals("")) {
-					JOptionPane.showMessageDialog(ImportDialog.this, "File path is empty");
+				if (pathString.equals(null) || pathString.equals("")) { //$NON-NLS-1$
+					JOptionPane.showMessageDialog(ImportDialog.this, Messages.getString("ImportDialog.FilePathIsEmpty")); //$NON-NLS-1$
 					reject = true;
 				} else {
 					File file = new File(pathString);
 					if (!file.exists()) {
-						JOptionPane.showMessageDialog(ImportDialog.this, "File " + pathString + " does not exist");
+						JOptionPane.showMessageDialog(ImportDialog.this, Messages.getString("ImportDialog.File") + pathString + Messages.getString("ImportDialog.DoesNotExist")); //$NON-NLS-1$ //$NON-NLS-2$
 						reject = true;
 					}
-					fileName = file.getName().replaceFirst(".txt", "").replaceFirst(".TXT", "");
+					fileName = file.getName().replaceFirst(".txt", "").replaceFirst(".TXT", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				}
 
 				if (reject)
 					return;
 
-				String user = "", comp = "";
-				String regex = "///";
+				String user = "", comp = ""; //$NON-NLS-1$ //$NON-NLS-2$
+				String regex = "///"; //$NON-NLS-1$
 				HashSet<String> uniPairs = new HashSet<>();
 
-				try (Stream<String> lines = Files.lines(Paths.get(pathString), Charset.forName("UTF-8"))) {
+				try (Stream<String> lines = Files.lines(Paths.get(pathString), Charset.forName("UTF-8"))) { //$NON-NLS-1$
 					Iterator<String> iter = lines.iterator();
 					int rowNumber = 0;
 					while (iter.hasNext()) {
@@ -216,7 +216,7 @@ class ImportDialog extends JDialog {
 						String line = iter.next();
 						if (rowNumber % 2 == 1) {
 							user = line;
-							comp = "";
+							comp = ""; //$NON-NLS-1$
 						} else {
 							comp = line;
 							uniPairs.add(user + regex + comp);
@@ -238,7 +238,7 @@ class ImportDialog extends JDialog {
 				owner.getDataTableModel().refreshData();
 				owner.getDataTableModel().fireTableDataChanged();
 
-				appendLog("Done!");
+				appendLog(Messages.getString("ImportDialog.Done")); //$NON-NLS-1$
 			}
 		};
 	}
@@ -247,17 +247,17 @@ class ImportDialog extends JDialog {
 		if (StringUtils.isNullOrEmpty(user) || StringUtils.isNullOrEmpty(comp))
 			return;
 
-		if (user.equals("Администратор") || user.equals("Внешний аудитор")
-				|| user.equals("Монитор клиентам"))
+		if (user.equals("Администратор") || user.equals("Внешний аудитор") //$NON-NLS-1$ //$NON-NLS-2$
+				|| user.equals("Монитор клиентам")) //$NON-NLS-1$
 			return;
-		if (comp.equals("A-GANDRABUR") || comp.equals("ZHURYLO") || comp.equals("S-KURASH")
-				|| comp.equals("V-SHTEFANIUK"))
+		if (comp.equals("A-GANDRABUR") || comp.equals("ZHURYLO") || comp.equals("S-KURASH") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				|| comp.equals("V-SHTEFANIUK")) //$NON-NLS-1$
 			return;
 
 		Connection conn = DBComm.getConnection();
 
-		String cmdSelect = "SELECT * FROM MainTable WHERE Person = ? AND Comp = ?";
-		String cmdInsert = "INSERT INTO MainTable (Person, Comp, IP, IP_Update_Date, IP_Check_Date, Orgs) VALUES (?, ?, ?, ?, ?, ?)";
+		String cmdSelect = "SELECT * FROM MainTable WHERE Person = ? AND Comp = ?"; //$NON-NLS-1$
+		String cmdInsert = "INSERT INTO MainTable (Person, Comp, IP, IP_Update_Date, IP_Check_Date, Orgs) VALUES (?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
 		Date currDate = new Date(new java.util.Date().getTime());
 
 		try (PreparedStatement statSelect = conn.prepareStatement(cmdSelect, ResultSet.TYPE_FORWARD_ONLY,
@@ -272,18 +272,18 @@ class ImportDialog extends JDialog {
 			statSelect.setString(2, realComp);
 			try (ResultSet rs = statSelect.executeQuery();) {
 				if (rs.next()) {
-					appendLog(user + " + " + comp + " = already exists!");
-					String orgs = rs.getString("Orgs");
+					appendLog(user + Messages.getString("ImportDialog.Plus") + comp + Messages.getString("ImportDialog.AlreadyExists")); //$NON-NLS-1$ //$NON-NLS-2$
+					String orgs = rs.getString("Orgs"); //$NON-NLS-1$
 					if (!orgs.contains(fileName)) {
-						orgs = orgs + ", " + fileName;
-						rs.updateString("Orgs", orgs);
+						orgs = orgs + Messages.getString("ImportDialog.Comma") + fileName; //$NON-NLS-1$
+						rs.updateString("Orgs", orgs); //$NON-NLS-1$
 						rs.updateRow();
-						appendLog("Organisation " + fileName + " has been added to " + user);
+						appendLog(Messages.getString("ImportDialog.Organisation") + fileName + Messages.getString("ImportDialog.HasBeenAddedTo") + user); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				} else {
 					String ip = compInfo.getSecond();
 					if (ip == null) {
-						appendLog("Cannot resolve IP-address for " + comp + ". The line is skipped.");
+						appendLog(Messages.getString("ImportDialog.CannotResolveIPAddressFrom") + comp + Messages.getString("ImportDialog.TheLineIsSkipped")); //$NON-NLS-1$ //$NON-NLS-2$
 					} else {
 						statInsert.setString(1, user); // Person
 						statInsert.setString(2, realComp); // Comp
@@ -293,7 +293,7 @@ class ImportDialog extends JDialog {
 						statInsert.setString(6, fileName); // Orgs == fileName
 						statInsert.executeUpdate();
 						
-						appendLog("IP-address for " + realComp + " is " + ip + ". The line is imported.");						
+						appendLog(Messages.getString("ImportDialog.IPAddressFor") + realComp + Messages.getString("ImportDialog.Is") + ip + Messages.getString("ImportDialog.TheLineIsImported"));						 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 				}
 			}
@@ -317,7 +317,7 @@ class ImportDialog extends JDialog {
 		if (str == null)
 			taLogArea.setText(null);
 		else
-			taLogArea.append(str + "\n");
+			taLogArea.append(str + "\n"); //$NON-NLS-1$
 		taLogArea.update(taLogArea.getGraphics());
 	}
 

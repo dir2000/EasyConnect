@@ -78,6 +78,7 @@ class MainFrame extends JFrame {
 //			alString[i] = al[i].toString();
 //		Arrays.sort(alString);
 //		System.out.println(Arrays.toString(alString));
+		//System.out.println(Locale.getDefault());
 		
 		Props.init();
 		DBComm.init(this);
@@ -110,7 +111,7 @@ class MainFrame extends JFrame {
 						conn.close();
 				} catch (SQLException ex) {
 					for (Throwable t : ex)
-						JOptionPane.showMessageDialog(MainFrame.this, t.getStackTrace(), "Connection closing error",
+						JOptionPane.showMessageDialog(MainFrame.this, t.getStackTrace(), Messages.getString("MainFrame.ConnectionClosingError"), //$NON-NLS-1$
 								JOptionPane.ERROR_MESSAGE);
 				}
 				
@@ -137,7 +138,7 @@ class MainFrame extends JFrame {
 	private ActionListener deleteMarkedRecordsListener() {
 		return new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String command = "DELETE FROM MainTable WHERE DELETIONMARK = TRUE";
+				String command = "DELETE FROM MainTable WHERE DELETIONMARK = TRUE"; //$NON-NLS-1$
 				Connection conn = DBComm.getConnection();
 				try (Statement stat = conn.createStatement();){
 					int rowCount = stat.executeUpdate(command);
@@ -145,7 +146,7 @@ class MainFrame extends JFrame {
 						dataTableModel.refreshData();
 						dataTableModel.fireTableDataChanged();
 					}
-					JOptionPane.showMessageDialog(MainFrame.this, rowCount + " records were deleted.");
+					JOptionPane.showMessageDialog(MainFrame.this, rowCount + Messages.getString("MainFrame.RrecordsWereDeleted.")); //$NON-NLS-1$
 				} catch (SQLException e1) {
 					throw new RuntimeException(e1);
 				} 
@@ -157,7 +158,7 @@ class MainFrame extends JFrame {
 		ActionListener listener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int answ = JOptionPane.showOptionDialog(MainFrame.this, "Are you sure?", "Exiting",
+				int answ = JOptionPane.showOptionDialog(MainFrame.this, Messages.getString("MainFrame.AreYouSure"), Messages.getString("MainFrame.Exiting"), //$NON-NLS-1$ //$NON-NLS-2$
 						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 				if (answ == JOptionPane.YES_OPTION)
 					System.exit(0);
@@ -223,19 +224,19 @@ class MainFrame extends JFrame {
 				}
 				
 				int order;
-				order = DBComm.getFieldDescription("ID").getOrder();
+				order = DBComm.getFieldDescription("ID").getOrder(); //$NON-NLS-1$
 				int id = (int) dataTableModel.getValueAt(row, order - 1);
-				order = DBComm.getFieldDescription("PERSON").getOrder();
+				order = DBComm.getFieldDescription("PERSON").getOrder(); //$NON-NLS-1$
 				String person = (String) dataTableModel.getValueAt(row, order - 1);
-				order = DBComm.getFieldDescription("COMP").getOrder();
+				order = DBComm.getFieldDescription("COMP").getOrder(); //$NON-NLS-1$
 				String comp = (String) dataTableModel.getValueAt(row, order - 1);
-				order = DBComm.getFieldDescription("IP").getOrder();
+				order = DBComm.getFieldDescription("IP").getOrder(); //$NON-NLS-1$
 				String ip = (String) dataTableModel.getValueAt(row, order - 1);
-				order = DBComm.getFieldDescription("IP_CHECK_DATE").getOrder();
+				order = DBComm.getFieldDescription("IP_CHECK_DATE").getOrder(); //$NON-NLS-1$
 				Date ip_Check_Date = (Date) dataTableModel.getValueAt(row, order - 1);
-				order = DBComm.getFieldDescription("IP_UPDATE_DATE").getOrder();
+				order = DBComm.getFieldDescription("IP_UPDATE_DATE").getOrder(); //$NON-NLS-1$
 				Date ip_Update_Date = (Date) dataTableModel.getValueAt(row, order - 1);
-				order = DBComm.getFieldDescription("ORGS").getOrder();
+				order = DBComm.getFieldDescription("ORGS").getOrder(); //$NON-NLS-1$
 				String orgs = (String) dataTableModel.getValueAt(row, order - 1);
 				
 				editRecordDialog.populate(id, person, comp, ip, ip_Check_Date, ip_Update_Date, orgs);
@@ -253,13 +254,13 @@ class MainFrame extends JFrame {
 					return;
 				row = dataTable.convertRowIndexToModel(row);
 				
-				String query = "UPDATE MainTable SET DeletionMark = ? WHERE Id = ?";
+				String query = "UPDATE MainTable SET DeletionMark = ? WHERE Id = ?"; //$NON-NLS-1$
 
-				int dmOrder = DBComm.getFieldDescription("DELETIONMARK").getOrder();
+				int dmOrder = DBComm.getFieldDescription("DELETIONMARK").getOrder(); //$NON-NLS-1$
 				boolean dmark = (boolean) dataTableModel.getValueAt(row, dmOrder - 1);
 				dmark = !dmark;
 				
-				int idOrder = DBComm.getFieldDescription("ID").getOrder();
+				int idOrder = DBComm.getFieldDescription("ID").getOrder(); //$NON-NLS-1$
 				int id = (int) dataTableModel.getValueAt(row, idOrder - 1);
 				
 				Connection conn = DBComm.getConnection();
@@ -308,7 +309,7 @@ class MainFrame extends JFrame {
 				if (text.trim().length() == 0) {
 					rowSorter.setRowFilter(null);
 				} else {
-					rowSorter.setRowFilter(RowFilter.regexFilter("(?i)(?u)" + text));
+					rowSorter.setRowFilter(RowFilter.regexFilter("(?i)(?u)" + text)); //$NON-NLS-1$
 				}
 			}
 	
@@ -319,13 +320,13 @@ class MainFrame extends JFrame {
 				if (text.trim().length() == 0) {
 					rowSorter.setRowFilter(null);
 				} else {
-					rowSorter.setRowFilter(RowFilter.regexFilter("(?i)(?u)" + text));
+					rowSorter.setRowFilter(RowFilter.regexFilter("(?i)(?u)" + text)); //$NON-NLS-1$
 				}
 			}
 	
 			@Override
 			public void changedUpdate(DocumentEvent e) {
-				throw new UnsupportedOperationException("Not supported yet.");
+				throw new UnsupportedOperationException(Messages.getString("MainFrame.NotSupportedYet")); //$NON-NLS-1$
 			}
 	
 		};
@@ -345,7 +346,7 @@ class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				int row = dataTable.getSelectedRow();
 				if (row == -1) {
-					JOptionPane.showMessageDialog(MainFrame.this, "No row is selected.");
+					JOptionPane.showMessageDialog(MainFrame.this, Messages.getString("MainFrame.NoRowIsSelected")); //$NON-NLS-1$
 					return;
 				}
 				row = dataTable.convertRowIndexToModel(row);
@@ -355,22 +356,22 @@ class MainFrame extends JFrame {
 	}
 
 	private void connectToRemote(int row) {
-		int order = DBComm.getFieldDescription("COMP").getOrder();
+		int order = DBComm.getFieldDescription("COMP").getOrder(); //$NON-NLS-1$
 		String comp = (String) dataTableModel.getValueAt(row, order - 1);
 		// JOptionPane.showMessageDialog(MainFrame.this, comp);
-		String filePathOb = Props.get("remoteProgramPath");
-		if (filePathOb == null || filePathOb.equals("")) {
+		String filePathOb = Props.get("remoteProgramPath"); //$NON-NLS-1$
+		if (filePathOb == null || filePathOb.equals(Messages.getString("MainFrame.EmptyString"))) { //$NON-NLS-1$
 			JOptionPane.showMessageDialog(MainFrame.this,
-					"Use \"Options\" menu to set remote program path!");
+					Messages.getString("MainFrame.UseOptionsMenuToSetRemoteProgramPath")); //$NON-NLS-1$
 			return;
 		}
 		File file = new File(filePathOb);
 		if (!file.exists()) {
 			JOptionPane.showMessageDialog(MainFrame.this,
-					"Remote access program \"" + filePathOb + "\" does not exist.");
+					Messages.getString("MainFrame.RemoteAccessProfram") + filePathOb + Messages.getString("MainFrame.DoesNotExist")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
-		String command = filePathOb + " " + comp;
+		String command = filePathOb + Messages.getString("MainFrame.OneSpace") + comp; //$NON-NLS-1$
 		try {
 			Runtime.getRuntime().exec(command);
 		} catch (IOException e) {
@@ -383,20 +384,20 @@ class MainFrame extends JFrame {
 		menuBar.setLayout(new FlowLayout(FlowLayout.LEFT));
 		setJMenuBar(menuBar);
 	
-		mnFile = new JMenu("File");
+		mnFile = new JMenu(Messages.getString("MainFrame.File")); //$NON-NLS-1$
 		menuBar.add(mnFile);
 	
-		mntmImport = new JMenuItem("Import...");
+		mntmImport = new JMenuItem(Messages.getString("MainFrame.Import")); //$NON-NLS-1$
 		mnFile.add(mntmImport);
 		
-		mntmDeleteMarkedRecords = new JMenuItem("Delete marked records");
+		mntmDeleteMarkedRecords = new JMenuItem(Messages.getString("MainFrame.DeleteMarkedRecords")); //$NON-NLS-1$
 		mntmDeleteMarkedRecords.addActionListener(deleteMarkedRecordsListener());
 		mnFile.add(mntmDeleteMarkedRecords);
 	
-		mntmExit = new JMenuItem("Exit");
+		mntmExit = new JMenuItem(Messages.getString("MainFrame.Exit")); //$NON-NLS-1$
 		mnFile.add(mntmExit);
 	
-		mntmOptions = new JMenuItem("Options");
+		mntmOptions = new JMenuItem(Messages.getString("MainFrame.Options")); //$NON-NLS-1$
 		menuBar.add(mntmOptions);
 	
 		mntmExit.addActionListener(exitListener());
@@ -413,13 +414,13 @@ class MainFrame extends JFrame {
 		dataTable.addMouseListener(doubleClickListener());
 		
 		DeletionMarkCellRenderer renderer = new DeletionMarkCellRenderer();
-		String header = DBComm.getFieldDescription("DELETIONMARK").getHeader();
+		String header = DBComm.getFieldDescription("DELETIONMARK").getHeader(); //$NON-NLS-1$
 		TableColumn column = dataTable.getColumn(header); 
 		column.setCellRenderer(renderer);
 		column.setMaxWidth(25);
 
 		//hide id column
-		header = DBComm.getFieldDescription("ID").getHeader();
+		header = DBComm.getFieldDescription("ID").getHeader(); //$NON-NLS-1$
 		column = dataTable.getColumn(header);
 		dataTable.getColumnModel().removeColumn(column);
 		
@@ -437,51 +438,51 @@ class MainFrame extends JFrame {
 		FlowLayout fl_buttonsPanel = (FlowLayout) buttonsPanel.getLayout();
 		fl_buttonsPanel.setAlignment(FlowLayout.LEFT);
 	
-		btnInsert = new JButton("Insert");
-		btnInsert.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Insert list item.png")));
+		btnInsert = new JButton(Messages.getString("MainFrame.Insert")); //$NON-NLS-1$
+		btnInsert.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Insert list item.png"))); //$NON-NLS-1$
 		btnInsert.addActionListener(insertListener());
 		// btnInsert.addActionListener((e) -> JOptionPane.showMessageDialog(this,
 		// "Insert!"));
 		buttonsPanel.add(btnInsert);
 	
-		btnEdit = new JButton("Edit");
+		btnEdit = new JButton(Messages.getString("MainFrame.Edit")); //$NON-NLS-1$
 		btnEdit.addActionListener(editListener());
-		btnEdit.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Change list item.png")));
+		btnEdit.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Change list item.png"))); //$NON-NLS-1$
 		buttonsPanel.add(btnEdit);
 	
-		btnDeletionMark = new JButton("Set-unset deletion mark");
+		btnDeletionMark = new JButton(Messages.getString("MainFrame.SetUnsetDeletionMark")); //$NON-NLS-1$
 		btnDeletionMark.addActionListener(deletionMarkListener());
-		btnDeletionMark.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Deletion mark.png")));
+		btnDeletionMark.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Deletion mark.png"))); //$NON-NLS-1$
 		buttonsPanel.add(btnDeletionMark);
 	
-		btnRefresh = new JButton("Refresh");
+		btnRefresh = new JButton(Messages.getString("MainFrame.Refresh")); //$NON-NLS-1$
 		btnRefresh.addActionListener(refreshListener());
-		btnRefresh.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Refresh.png")));
+		btnRefresh.setIcon(new ImageIcon(MainFrame.class.getResource("/images/Refresh.png"))); //$NON-NLS-1$
 		buttonsPanel.add(btnRefresh);
 
-		lblFilter = new JLabel("Filter");
+		lblFilter = new JLabel(Messages.getString("MainFrame.Filter")); //$NON-NLS-1$
 		buttonsPanel.add(lblFilter);
 
 		tfFilter = new JTextField();
 		buttonsPanel.add(tfFilter);
-		tfFilter.setColumns(15);
+		tfFilter.setColumns(12);
 		tfFilter.getDocument().addDocumentListener(filterListener());
 		
-		btnClearFilter = new JButton("Clear");
+		btnClearFilter = new JButton(Messages.getString("MainFrame.Clear")); //$NON-NLS-1$
 		buttonsPanel.add(btnClearFilter);
 		
 		connectPanel = new JPanel();
 		controlsPanel.add(connectPanel);
 		connectPanel.setLayout(new BorderLayout(0, 0));
 		
-		btnConnect = new JButton("CONNECT");
+		btnConnect = new JButton(Messages.getString("MainFrame.Connest")); //$NON-NLS-1$
 		connectPanel.add(btnConnect, BorderLayout.NORTH);
 		btnConnect.addActionListener(connectListener());
-		btnConnect.setIcon(new ImageIcon(MainFrame.class.getResource("/images/UVNC.png")));
+		btnConnect.setIcon(new ImageIcon(MainFrame.class.getResource("/images/UVNC.png"))); //$NON-NLS-1$
 		btnClearFilter.addActionListener(clearFilterListener());
 		JScrollPane scrollPane = new JScrollPane(dataTable);
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
 	
-		pack();
+		setSize(700, 1000);
 	}
 }

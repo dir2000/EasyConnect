@@ -41,7 +41,7 @@ class EditRecord extends JDialog {
 	private JFormattedTextField tfIP;
 
 	EditRecord(MainFrame owner) {
-		super(owner, "Insert new record", true);
+		super(owner, Messages.getString("EditRecord.InsertNewRecord"), true); //$NON-NLS-1$
 		this.owner = owner;
 		buildGUI();
 	}
@@ -49,23 +49,23 @@ class EditRecord extends JDialog {
 	private ActionListener okListener() {
 		return new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				String errText = "";
+				String errText = Messages.getString("EditRecord.EmptyString"); //$NON-NLS-1$
 				String person = tfPerson.getText();
-				if (person ==  null || person.equals("")) {
-					errText = errText + "The person field is empty.";
+				if (person ==  null || person.equals(Messages.getString("EditRecord.EmptyString"))) { //$NON-NLS-1$
+					errText = errText + Messages.getString("EditRecord.ThePersonFieldIsEmpty"); //$NON-NLS-1$
 				} else {
 					person = person.trim();
 				}
 				String comp = tfComp.getText();
-				if (comp ==  null || comp.equals("")) {
-					if (!errText.equals(""))
-						errText = errText + "\n";
-					errText = errText + "The computer field is empty.";
+				if (comp ==  null || comp.equals(Messages.getString("EditRecord.EmptyString"))) { //$NON-NLS-1$
+					if (!errText.equals(Messages.getString("EditRecord.EmptyString"))) //$NON-NLS-1$
+						errText = errText + "\n"; //$NON-NLS-1$
+					errText = errText + Messages.getString("EditRecord.TheComputerFieldIsEmpty."); //$NON-NLS-1$
 				} else {
 					comp = comp.trim();
 				}				
-				if (!errText.equals("")) {
-					JOptionPane.showMessageDialog(EditRecord.this, errText, "Check", JOptionPane.ERROR_MESSAGE);
+				if (!errText.equals(Messages.getString("EditRecord.EmptyString"))) { //$NON-NLS-1$
+					JOptionPane.showMessageDialog(EditRecord.this, errText, Messages.getString("EditRecord.Check"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$
 					return;
 				}
 				
@@ -78,16 +78,16 @@ class EditRecord extends JDialog {
 					int exId = getAnExistingId(person, comp, conn);
 					if (exId != -1) {
 						JOptionPane.showMessageDialog(
-								EditRecord.this, "The database record with this person (" + person
-										+ ") and computer name (" + comp + ") already exists!",
-								"Check", JOptionPane.ERROR_MESSAGE);
+								EditRecord.this, Messages.getString("EditRecord.TheDatabaseRecordWithThisPerson") + person //$NON-NLS-1$
+										+ Messages.getString("EditRecord.AndComputerName") + comp + Messages.getString("EditRecord.AlreadyExists"), //$NON-NLS-1$ //$NON-NLS-2$
+								Messages.getString("EditRecord.Check"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$
 						return;
 					}
 					
-					query = "INSERT INTO MainTable VALUES(NULL,false,?,?,?,?,?,?)";
+					query = "INSERT INTO MainTable VALUES(NULL,false,?,?,?,?,?,?)"; //$NON-NLS-1$
 				}
 				else
-					query = "UPDATE MainTable SET Person = ?, Comp = ?, IP = ?, IP_Update_Date = ?, IP_Check_Date = ?, Orgs = ? WHERE Id = ?";
+					query = "UPDATE MainTable SET Person = ?, Comp = ?, IP = ?, IP_Update_Date = ?, IP_Check_Date = ?, Orgs = ? WHERE Id = ?"; //$NON-NLS-1$
 				try (PreparedStatement st = conn.prepareStatement(query);) {
 					st.setString(1, person);
 					st.setString(2, comp);
@@ -110,7 +110,7 @@ class EditRecord extends JDialog {
 				model.fireTableDataChanged();
 
 				// https://stackoverflow.com/questions/22066387/how-to-search-an-element-in-a-jtable-java
-				int idOrder = DBComm.getFieldDescription("ID").getOrder() - 1;
+				int idOrder = DBComm.getFieldDescription("ID").getOrder() - 1; //$NON-NLS-1$
 				int convertedRow;
 				for (int i = 0; i < model.getRowCount(); i++) {// For each row
 					if (model.getValueAt(i, idOrder).equals(id)) {
@@ -148,7 +148,7 @@ class EditRecord extends JDialog {
 		this.ip_Check_Date = ip_Check_Date;
 		this.ip_Update_Date = ip_Update_Date;
 		tfOrgs.setText(orgs);
-		setTitle("Update record");
+		setTitle(Messages.getString("EditRecord.UpdateRecord")); //$NON-NLS-1$
 	}
 
 	@Override
@@ -169,13 +169,13 @@ class EditRecord extends JDialog {
 		return new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				String ip = tfIP.getText();
-				if (ip ==  null || ip.equals("") || ip.equals("   .   .   .   ")) {
-					JOptionPane.showMessageDialog(EditRecord.this, "The IP-Address field is empty.");
+				if (ip ==  null || ip.equals(Messages.getString("EditRecord.EmptyString")) || ip.equals("   .   .   .   ")) { //$NON-NLS-1$ //$NON-NLS-2$
+					JOptionPane.showMessageDialog(EditRecord.this, Messages.getString("EditRecord.TheIPAddressFieldIsEmpty")); //$NON-NLS-1$
 					return;
 				}
 				String comp = GeneralPurpose.getComp(ip);
 				if (comp == null)
-					JOptionPane.showMessageDialog(EditRecord.this, "Cannot resolve computer name for IP-address: " + ip);
+					JOptionPane.showMessageDialog(EditRecord.this, Messages.getString("EditRecord.CannotResolveComputer") + ip); //$NON-NLS-1$
 				else
 					tfComp.setText(comp);
 			}
@@ -184,13 +184,13 @@ class EditRecord extends JDialog {
 	
 	private int getAnExistingId(String person, String comp, Connection conn) {
 		String query;
-		query = "SELECT * FROM MainTable WHERE Person = ? AND Comp = ?";
+		query = "SELECT * FROM MainTable WHERE Person = ? AND Comp = ?"; //$NON-NLS-1$
 		try (PreparedStatement statSel = conn.prepareStatement(query);){
 			statSel.setString(1, person);
 			statSel.setString(2, comp);
 			try (ResultSet rs = statSel.executeQuery();) {
 				if (rs.next()) {
-					return rs.getInt("Id");
+					return rs.getInt("Id"); //$NON-NLS-1$
 				}
 			}
 		} catch (SQLException e) {
@@ -204,33 +204,33 @@ class EditRecord extends JDialog {
 		JPanel panel = new JPanel();
 		getContentPane().add(panel);
 	
-		JLabel lblPerson = new JLabel("Person");
-		lblPerson.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		JLabel lblPerson = new JLabel(Messages.getString("EditRecord.Person")); //$NON-NLS-1$
+		lblPerson.setFont(new Font("Tahoma", Font.PLAIN, 16)); //$NON-NLS-1$
 	
-		JLabel lblIpaddress = new JLabel("IP-Address");
-		lblIpaddress.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		JLabel lblIpaddress = new JLabel(Messages.getString("EditRecord.IPAddress")); //$NON-NLS-1$
+		lblIpaddress.setFont(new Font("Tahoma", Font.PLAIN, 16)); //$NON-NLS-1$
 	
 		tfPerson = new JTextField();
-		tfPerson.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		tfPerson.setFont(new Font("Tahoma", Font.PLAIN, 16)); //$NON-NLS-1$
 		tfPerson.setColumns(10);
 	
-		JButton btnDefineComputerName = new JButton("Define computer name");
+		JButton btnDefineComputerName = new JButton(Messages.getString("EditRecord.DefineComputerName")); //$NON-NLS-1$
 		btnDefineComputerName.addActionListener(defineComputerNameListener());
 	
-		JLabel lblComputerName = new JLabel("Computer name");
-		lblComputerName.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		JLabel lblComputerName = new JLabel(Messages.getString("EditRecord.ComputerName")); //$NON-NLS-1$
+		lblComputerName.setFont(new Font("Tahoma", Font.PLAIN, 16)); //$NON-NLS-1$
 	
 		tfComp = new JTextField();
-		tfComp.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		tfComp.setFont(new Font("Tahoma", Font.PLAIN, 16)); //$NON-NLS-1$
 		tfComp.setColumns(10);
 	
 		JPanel pnlButtons = new JPanel();
 		
-		JLabel lblOrgs = new JLabel("Organisations");
-		lblOrgs.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		JLabel lblOrgs = new JLabel(Messages.getString("EditRecord.Organisation")); //$NON-NLS-1$
+		lblOrgs.setFont(new Font("Tahoma", Font.PLAIN, 16)); //$NON-NLS-1$
 		
 		tfOrgs = new JTextField();
-		tfOrgs.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		tfOrgs.setFont(new Font("Tahoma", Font.PLAIN, 16)); //$NON-NLS-1$
 		tfOrgs.setColumns(10);
 		
 //		MaskFormatter mf = null;
@@ -240,7 +240,7 @@ class EditRecord extends JDialog {
 //			throw new RuntimeException(e);
 //		}
 		tfIP = new JFormattedTextField(new IPAddressFormatter());
-		tfIP.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		tfIP.setFont(new Font("Tahoma", Font.PLAIN, 16)); //$NON-NLS-1$
 		GroupLayout gl_panel = new GroupLayout(panel);
 		gl_panel.setHorizontalGroup(
 			gl_panel.createParallelGroup(Alignment.TRAILING)
@@ -293,14 +293,14 @@ class EditRecord extends JDialog {
 					.addContainerGap())
 		);
 	
-		JButton btnOK = new JButton("OK");
+		JButton btnOK = new JButton("OK"); //$NON-NLS-1$
 		btnOK.addActionListener(okListener());
-		btnOK.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		btnOK.setFont(new Font("Tahoma", Font.PLAIN, 16)); //$NON-NLS-1$
 		pnlButtons.add(btnOK);
 	
-		JButton btnCancel = new JButton("Cancel");
+		JButton btnCancel = new JButton(Messages.getString("EditRecord.Cancel")); //$NON-NLS-1$
 		btnCancel.addActionListener(cancelListener());
-		btnCancel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		btnCancel.setFont(new Font("Tahoma", Font.PLAIN, 16)); //$NON-NLS-1$
 		pnlButtons.add(btnCancel);
 		panel.setLayout(gl_panel);
 	
