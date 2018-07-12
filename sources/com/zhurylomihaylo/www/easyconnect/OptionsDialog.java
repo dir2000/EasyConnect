@@ -14,31 +14,28 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
+import java.util.Locale;
 import java.awt.event.ActionEvent;
+import javax.swing.JRadioButton;
+import javax.swing.border.TitledBorder;
+import javax.swing.SwingConstants;
+import javax.swing.JSeparator;
 
 public class OptionsDialog extends JDialog {
 
 	private final JPanel contentPanel = new JPanel();
 	private JTextField filePath;
 	private JFileChooser fileChooser;	
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		try {
-			OptionsDialog dialog = new OptionsDialog(null);
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			dialog.setVisible(true);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+	private JRadioButton rdbtnAutoLocale;
+	private JRadioButton rdbtnEnglishLocale;
+	private JRadioButton rdbtnUkrainianLocale;
 
 	/**
 	 * Create the dialog.
@@ -52,10 +49,29 @@ public class OptionsDialog extends JDialog {
 		String filePathStr = Props.get("remoteProgramPath"); //$NON-NLS-1$
 		if (filePathStr != null)
 			filePath.setText(filePathStr);
+		
+		String languageTag = Props.get("languageTag"); //$NON-NLS-1$
+		if (languageTag == null || languageTag.equals("auto")) //$NON-NLS-1$
+			rdbtnAutoLocale.setSelected(true);
+		else if (languageTag.equals("en")) //$NON-NLS-1$
+			rdbtnEnglishLocale.setSelected(true);
+		else if (languageTag.equals("uk")) //$NON-NLS-1$
+			rdbtnUkrainianLocale.setSelected(true);
+		else
+			rdbtnAutoLocale.setSelected(true);
 	} 
 	
 	private void storeValues() {
 		Props.set("remoteProgramPath", filePath.getText()); //$NON-NLS-1$
+		
+		if (rdbtnEnglishLocale.isSelected())
+			Props.set("languageTag", "en"); //$NON-NLS-1$ //$NON-NLS-2$
+		else if (rdbtnUkrainianLocale.isSelected())
+			Props.set("languageTag", "uk"); //$NON-NLS-1$ //$NON-NLS-2$
+		else
+			Props.set("languageTag", "auto"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		Messages.defineResourceBundle();
 	}
 	
 	private ActionListener browseListener() {
@@ -106,14 +122,14 @@ public class OptionsDialog extends JDialog {
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 		{
-			JPanel panel = new JPanel();
-			contentPanel.add(panel);
-			GridBagLayout gbl_panel = new GridBagLayout();
-			gbl_panel.columnWidths = new int[] {321, 400, 80, 0};
-			gbl_panel.rowHeights = new int[]{23, 0};
-			gbl_panel.columnWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
-			gbl_panel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
-			panel.setLayout(gbl_panel);
+			JPanel panelRemote = new JPanel();
+			contentPanel.add(panelRemote);
+			GridBagLayout gbl_panelRemote = new GridBagLayout();
+			gbl_panelRemote.columnWidths = new int[] {321, 400, 80, 0};
+			gbl_panelRemote.rowHeights = new int[]{23, 0};
+			gbl_panelRemote.columnWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+			gbl_panelRemote.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+			panelRemote.setLayout(gbl_panelRemote);
 			{
 				JLabel lblNewLabel = new JLabel(Messages.getString("OptionsDialog.EnterThePathToRemoteAccessProgram")); //$NON-NLS-1$
 				GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
@@ -121,7 +137,7 @@ public class OptionsDialog extends JDialog {
 				gbc_lblNewLabel.insets = new Insets(0, 0, 0, 5);
 				gbc_lblNewLabel.gridx = 0;
 				gbc_lblNewLabel.gridy = 0;
-				panel.add(lblNewLabel, gbc_lblNewLabel);
+				panelRemote.add(lblNewLabel, gbc_lblNewLabel);
 			}
 			{
 				filePath = new JTextField();
@@ -130,7 +146,7 @@ public class OptionsDialog extends JDialog {
 				gbc_textField.insets = new Insets(0, 0, 0, 5);
 				gbc_textField.gridx = 1;
 				gbc_textField.gridy = 0;
-				panel.add(filePath, gbc_textField);
+				panelRemote.add(filePath, gbc_textField);
 				filePath.setColumns(10);
 			}
 			{
@@ -141,7 +157,40 @@ public class OptionsDialog extends JDialog {
 				gbc_btnBrowse.fill = GridBagConstraints.BOTH;
 				gbc_btnBrowse.gridx = 2;
 				gbc_btnBrowse.gridy = 0;
-				panel.add(btnBrowse, gbc_btnBrowse);
+				panelRemote.add(btnBrowse, gbc_btnBrowse);
+			}
+		}
+		{
+			JPanel panelLocale = new JPanel();
+			panelLocale.setBorder(new TitledBorder(null, Messages.getString("OptionsDialog.ChooseInterfaceLanguage"), TitledBorder.LEADING, TitledBorder.TOP, null, null)); //$NON-NLS-1$
+			FlowLayout flowLayout = (FlowLayout) panelLocale.getLayout();
+			flowLayout.setAlignment(FlowLayout.LEFT);
+			contentPanel.add(panelLocale);
+			
+			ButtonGroup group = new ButtonGroup(); 
+			{
+				rdbtnAutoLocale = new JRadioButton("Auto"); //$NON-NLS-1$
+				group.add(rdbtnAutoLocale);
+				panelLocale.add(rdbtnAutoLocale);
+			}
+			{
+				rdbtnEnglishLocale = new JRadioButton("English"); //$NON-NLS-1$
+				group.add(rdbtnEnglishLocale);
+				panelLocale.add(rdbtnEnglishLocale);
+			}
+			{
+				rdbtnUkrainianLocale = new JRadioButton("Українська"); //$NON-NLS-1$
+				group.add(rdbtnUkrainianLocale);
+				panelLocale.add(rdbtnUkrainianLocale);
+			}			
+			{
+				JSeparator separator = new JSeparator();
+				panelLocale.add(separator);
+			}
+			{
+				JLabel lblDefaultLocale = new JLabel(Messages.getString("OptionsDialog.lblDefaultLocale.text") + " " + Locale.getDefault());
+				panelLocale.add(lblDefaultLocale);
+				lblDefaultLocale.setHorizontalAlignment(SwingConstants.LEFT);
 			}
 		}
 		{

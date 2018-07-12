@@ -81,6 +81,7 @@ class MainFrame extends JFrame {
 		//System.out.println(Locale.getDefault());
 		
 		Props.init();
+		Messages.init();
 		DBComm.init(this);
 		buildGUI();
 		refreshIPs();
