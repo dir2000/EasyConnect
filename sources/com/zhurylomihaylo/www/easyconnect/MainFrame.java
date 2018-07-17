@@ -20,6 +20,9 @@ import java.sql.Statement;
 import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -66,20 +69,14 @@ class MainFrame extends JFrame {
 	private JLabel lblFilter;
 	private JButton btnClearFilter;
 	private TableRowSorter<TableModel> rowSorter;
-	private Thread thrIPRefresher;
 	private JButton btnConnect;
 	private JMenuItem mntmDeleteMarkedRecords;
 	private JPanel connectPanel;
+	
+	ExecutorService exec = Executors.newSingleThreadExecutor();
+	private IPRefresher ipr;
 
 	MainFrame() {
-//		Locale [] al = DateFormat.getAvailableLocales();
-//		String [] alString = new String[al.length];
-//		for (int i = 0; i < al.length; i++) 
-//			alString[i] = al[i].toString();
-//		Arrays.sort(alString);
-//		System.out.println(Arrays.toString(alString));
-		//System.out.println(Locale.getDefault());
-		
 		Props.init();
 		Messages.init();
 		DBComm.init(this);
@@ -88,9 +85,8 @@ class MainFrame extends JFrame {
 	}
 
 	private void refreshIPs() {
-		IPRefresher ipr = new IPRefresher();
-		thrIPRefresher = new Thread(ipr);
-		thrIPRefresher.start();
+		ipr = new IPRefresher();
+		exec.execute(ipr);
 	}
 
 	DataTableModel getDataTableModel() {
@@ -112,12 +108,18 @@ class MainFrame extends JFrame {
 						conn.close();
 				} catch (SQLException ex) {
 					for (Throwable t : ex)
-						JOptionPane.showMessageDialog(MainFrame.this, t.getStackTrace(), Messages.getString("MainFrame.ConnectionClosingError"), //$NON-NLS-1$
+						JOptionPane.showMessageDialog(MainFrame.this, t.getStackTrace(),
+								Messages.getString("MainFrame.ConnectionClosingError"), //$NON-NLS-1$
 								JOptionPane.ERROR_MESSAGE);
 				}
-				
-				if (thrIPRefresher.isAlive())
-					thrIPRefresher.interrupt();
+
+				ipr.cancel();
+				exec.shutdown();
+				try {
+					exec.awaitTermination(10, TimeUnit.SECONDS);
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
+				}
 			}
 		});
 	}
@@ -162,7 +164,8 @@ class MainFrame extends JFrame {
 				int answ = JOptionPane.showOptionDialog(MainFrame.this, Messages.getString("MainFrame.AreYouSure"), Messages.getString("MainFrame.Exiting"), //$NON-NLS-1$ //$NON-NLS-2$
 						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 				if (answ == JOptionPane.YES_OPTION)
-					System.exit(0);
+					MainFrame.this.setVisible(false);
+					MainFrame.this.dispose();
 				;
 			}
 		};

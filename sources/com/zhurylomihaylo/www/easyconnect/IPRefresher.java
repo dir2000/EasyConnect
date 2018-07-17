@@ -7,6 +7,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 class IPRefresher implements Runnable {
+	private volatile boolean canceled;
+	
+	void cancel() {
+		canceled = true;
+	}
+	
 	@Override
 	public void run() {
 		String cmdSel = "SELECT * FROM MainTable WHERE IP_Check_Date IS NULL OR IP_Check_Date < ?";
@@ -29,6 +35,9 @@ class IPRefresher implements Runnable {
 					}
 					rs.updateDate("IP_CHECK_DATE", currDate);
 					rs.updateRow();
+					
+					if (canceled)
+						return;
 				}
 			}
 		} catch (SQLException e) {
